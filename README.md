@@ -13,6 +13,6 @@ You can also mention what technologies or frameworks are used (e.g., Next.js, Ta
 | Mentor  | Winston             |
 | Leader  | Stanley             |
 | Member  | Shravanthiga        |
-| Member  | Sanju               |
+| Member  | Sanjuvigasini       |
 | Member  | Monica              |
 | Member  | Rivaldo             |
