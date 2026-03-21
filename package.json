@@ -1,0 +1,17 @@
+{
+  "name": "itcamp-group4",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "npm run dev --workspace @itcamp/web",
+    "dev:api": "npm run dev --workspace @itcamp/api",
+    "build": "npm run build --workspace @itcamp/web && npm run build --workspace @itcamp/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
