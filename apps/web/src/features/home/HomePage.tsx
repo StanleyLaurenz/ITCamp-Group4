@@ -1,6 +1,8 @@
+'use client'
+
 import { useEffect, useState } from 'react'
-import { HealthCard } from '../components/HealthCard'
-import { getApiBaseUrl, getHealth } from '../lib/api'
+import { HealthCard } from '../../components/HealthCard'
+import { getApiBaseUrl, getHealth } from '../../lib/api'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -53,7 +55,6 @@ export function HomePage() {
             React and Node.js are ready to build on.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-slate-600">
-            This starter keeps the frontend and backend separate, typed, and easy to grow.
             The page below verifies that the React app can reach the Express API through the
             configured environment variables.
           </p>

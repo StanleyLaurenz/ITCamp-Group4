@@ -5,7 +5,7 @@ export type HealthResponse = {
 }
 
 export function getApiBaseUrl() {
-  return import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3001'
+  return process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3001'
 }
 
 export async function getHealth(): Promise<HealthResponse> {
