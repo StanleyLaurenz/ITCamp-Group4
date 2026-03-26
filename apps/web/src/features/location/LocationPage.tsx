@@ -5,8 +5,17 @@ import { Filter } from "./Filter";
 import { Search } from "./Search";
 import Link from "next/link";
 import { LocationCard } from "./LocationCard";
+import { getAttractions } from "../../lib/api";
 
 export function LocationPage() {
+  useEffect(() => {
+    async function fetchData() {
+      const data = await getAttractions();
+      console.log(data);
+    }
+    fetchData();
+  }, []);
+
   return (
     // Navbar
     <main>
@@ -30,11 +39,18 @@ export function LocationPage() {
               Click to view more
             </Link>
           </div>
+
           {/* Flex row that allows for horizontal scrolling if needed */}
-          <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-            <LocationCard isSaved />
-            <LocationCard isSaved />
-            <LocationCard isSaved />
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            <LocationCard
+              id="1"
+              title="Gardens by the Bay"
+              rating={4.8}
+              mrtLocation="Bayfront MRT"
+              category="Attraction"
+              imageUrl="https://www.arup.com/globalassets/images/projects/m/marina-bay-sands-integrated-resort/marina-bay-sands-integrated-resort-header.webp?width=1840&height=1035&quality=80"
+            />
+            {/* Add more cards... */}
           </div>
         </section>
 
@@ -43,13 +59,16 @@ export function LocationPage() {
           <h2 className="text-xl font-bold text-slate-800 mb-6 px-2">
             Browse More
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <LocationCard />
-            <LocationCard />
-            <LocationCard />
-            <LocationCard />
-            <LocationCard />
-            <LocationCard />
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            <LocationCard
+              id="2"
+              title="Gardens by the Bay"
+              rating={4.8}
+              mrtLocation="Bayfront MRT"
+              category="Attraction"
+              imageUrl="https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600"
+            />
+            {/* Add more cards... */}
           </div>
         </section>
       </div>
