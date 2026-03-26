@@ -1,4 +1,5 @@
-import type { PropsWithChildren } from 'react'
+import type { PropsWithChildren } from "react";
+import Link from "next/link";
 
 export function AppLayout({ children }: PropsWithChildren) {
   return (
@@ -7,5 +8,5 @@ export function AppLayout({ children }: PropsWithChildren) {
         {children}
       </div>
     </div>
-  )
+  );
 }
