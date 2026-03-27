@@ -3,6 +3,7 @@
 import React from "react";
 import { LocationCard } from "./LocationCard";
 import { getCategories } from "../../utils/categorize";
+import { getStaticRating } from "../../utils/generateRating";
 
 interface BrowseSectionProps {
   loading: boolean;
@@ -43,13 +44,14 @@ export function BrowseSection({
             const id = Number(item["properties"]["OBJECTID_1"]);
 
             const dynamicCategory = getCategories(item);
+            const rating = getStaticRating(id);
 
             return (
               <LocationCard
                 key={id}
                 id={id.toString()}
                 title={item["properties"]["PAGETITLE"]}
-                rating={4.8}
+                rating={rating}
                 mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
                 categories={dynamicCategory}
                 imageUrl={item["imageUrl"]}
