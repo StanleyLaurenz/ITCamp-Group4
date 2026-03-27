@@ -2,6 +2,7 @@
 
 import React from "react";
 import { LocationCard } from "./LocationCard";
+import { getCategories } from "../../utils/categorize";
 
 interface BrowseSectionProps {
   loading: boolean;
@@ -40,6 +41,9 @@ export function BrowseSection({
         ) : (
           filteredAttractions.slice(0, visibleCount).map((item) => {
             const id = Number(item["properties"]["OBJECTID_1"]);
+
+            const dynamicCategory = getCategories(item);
+
             return (
               <LocationCard
                 key={id}
@@ -47,7 +51,7 @@ export function BrowseSection({
                 title={item["properties"]["PAGETITLE"]}
                 rating={4.8}
                 mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
-                category="Attraction"
+                categories={dynamicCategory}
                 imageUrl={item["imageUrl"]}
                 isFavorite={savedIds.includes(id)}
                 onFavoriteToggle={() => toggleSave(id)}

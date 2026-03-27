@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Heart } from "react-feather";
 import { LocationCard } from "./LocationCard";
+import { getCategories } from "../../utils/categorize";
 
 interface SavedSectionProps {
   isLoggedIn: boolean;
@@ -115,6 +116,7 @@ export function SavedSection({
         >
           {savedLocations.map((item) => {
             const id = Number(item["properties"]["OBJECTID_1"]);
+            const dynamicCategory = getCategories(item);
             return (
               <div
                 key={`saved-wrapper-${id}`}
@@ -125,7 +127,7 @@ export function SavedSection({
                   title={item["properties"]["PAGETITLE"]}
                   rating={4.8}
                   mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
-                  category="Saved"
+                  categories={dynamicCategory}
                   imageUrl={item["imageUrl"]}
                   isFavorite={true}
                   onFavoriteToggle={() => toggleSave(id)}
