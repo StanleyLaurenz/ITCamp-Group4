@@ -48,7 +48,7 @@ export function LocationCard({
         className="absolute top-4 right-4 z-20 p-2 bg-black/30 backdrop-blur-sm rounded-full transition-colors hover:bg-black/50 active:scale-95"
       >
         <Heart
-          size={14}
+          size={16}
           className={`transition-colors ${
             isFavorite ? "fill-red-500 text-red-500" : "text-white"
           }`}
