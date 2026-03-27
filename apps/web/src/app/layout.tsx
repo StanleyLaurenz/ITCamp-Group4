@@ -1,16 +1,19 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { AuthProvider } from '@/context/AuthContext'
 import '../styles/index.css'
 
 export const metadata: Metadata = {
-  title: 'ITCamp Group 4',
-  description: 'Next.js frontend connected to the ITCamp Group 4 Express API.',
+  title: 'Trippa',
+  description: 'Explore tourist attractions in Singapore.',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   )
 }

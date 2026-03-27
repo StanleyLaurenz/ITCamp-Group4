@@ -1,0 +1,13 @@
+import Navbar from '@/components/Navbar'
+
+export default function SavedPage() {
+  return (
+    <div>
+      <Navbar />
+      <main className="max-w-7xl mx-auto px-6 py-16">
+        <h1 className="text-2xl font-bold text-gray-800">Saved</h1>
+        <p className="text-gray-500 mt-2">Your saved locations will appear here.</p>
+      </main>
+    </div>
+  )
+}

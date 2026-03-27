@@ -1,10 +1,11 @@
-import { AppLayout } from '../layouts/AppLayout'
-import { HomePage } from '../features/home/HomePage'
+import Navbar from '@/components/Navbar'
+import HeroSection from '@/components/HeroSection'
 
 export default function Page() {
   return (
-    <AppLayout>
-      <HomePage />
-    </AppLayout>
+    <div className="min-h-screen bg-slate-950">
+      <Navbar />
+      <HeroSection />
+    </div>
   )
 }
