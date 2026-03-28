@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { User, LogOut, ChevronDown, Heart } from "react-feather";
 
 export default function Navbar() {
   const { user, loading, signOut } = useAuth();
@@ -44,13 +45,13 @@ export default function Navbar() {
   }, [isProfileMenuOpen]);
 
   return (
-    <nav className="border-b border-gray-100 bg-white shadow-sm">
+    <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Left: Logo + Nav links */}
         <div className="flex min-w-0 items-center gap-5 sm:gap-8">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <img src="../../public/Frame.png" alt="" />
+            <img src="/Frame.png" alt="Trippa Logo" className="w-6 h-6" />
             <span className="text-base font-semibold text-blue-600">
               Trippa
             </span>
@@ -115,25 +116,43 @@ export default function Navbar() {
                   </button>
 
                   {isProfileMenuOpen && (
-                    <div className="absolute right-0 top-full z-20 mt-3 w-64 rounded-2xl border border-gray-200 bg-white p-3 shadow-lg">
-                      <div className="border-b border-gray-100 px-1 pb-3">
-                        <p className="text-sm font-semibold text-slate-900">
+                    <div className="absolute right-0 top-full z-20 mt-3 w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                      <div className="px-4 py-3 border-b border-gray-50">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
+                          Authenticated as
+                        </p>
+                        <p className="text-sm font-bold text-slate-900 truncate">
                           {username}
                         </p>
-                        <p className="mt-1 break-all text-sm text-gray-500">
+                        <p className="text-[11px] text-gray-500 truncate">
                           {email}
                         </p>
                       </div>
 
-                      <button
-                        onClick={async () => {
-                          setIsProfileMenuOpen(false);
-                          await signOut();
-                        }}
-                        className="mt-3 w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                      >
-                        Sign out
-                      </button>
+                      <div className="p-1">
+                        <button
+                          onClick={async (e) => {
+                            // 1. Stop the dropdown from closing prematurely
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            try {
+                              // 2. Perform the sign out FIRST
+                              await signOut();
+
+                              // 3. ONLY close the menu after the sign out is successful
+                              setIsProfileMenuOpen(false);
+                            } catch (error) {
+                              console.error("Sign out failed:", error);
+                              // Optional: keep menu open or show error if sign out fails
+                            }
+                          }}
+                          className="flex items-center gap-3 w-full rounded-xl px-4 py-3 text-left text-sm font-bold text-red-600 transition-colors hover:bg-red-50 relative z-[60]"
+                        >
+                          <LogOut size={16} />
+                          Sign out
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
