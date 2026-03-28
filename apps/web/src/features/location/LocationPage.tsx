@@ -3,17 +3,21 @@
 import { useEffect, useState } from "react";
 import { Filter } from "./Filter";
 import { Search } from "./Search";
+import { useAuth } from "@/context/AuthContext";
 import { getAttractions } from "../../lib/api";
 import { SavedSection } from "./SavedSection";
 import { BrowseSection } from "./BrowseSection";
 
 export function LocationPage() {
+  const { user, loading: authLoading } = useAuth();
   const [attractions, setAttractions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [savedIds, setSavedIds] = useState<number[]>([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
   const [visibleCount, setVisibleCount] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     async function fetchData() {

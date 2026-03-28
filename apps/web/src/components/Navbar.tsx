@@ -160,13 +160,13 @@ export default function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/login"
+                  href={`/login?returnTo=${encodeURIComponent(pathname)}`}
                   className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"
                 >
                   Log in
                 </Link>
                 <Link
-                  href="/signup"
+                  href={`/signup?returnTo=${encodeURIComponent(pathname)}`}
                   className="rounded bg-blue-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                 >
                   Sign up
