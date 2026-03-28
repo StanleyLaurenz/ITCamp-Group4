@@ -1,60 +1,75 @@
-import Link from 'next/link'
+import Link from "next/link";
+import { MapPin, Navigation, Shield, Zap } from "react-feather";
 
 /**
- * Hero section — same layout for both guest and logged-in users.
- *
- * Background image: place your Singapore skyline photo at
- *   apps/web/public/hero-bg.jpg
- * and it will be picked up automatically. Until then a blue gradient
- * is used as a fallback.
+ * Enhanced Hero Section
+ * Uses the Space Grotesk font family established in tailwind.config.ts
+ * and brand colors like #1572D3 used in the search and location components.
  */
 export default function HeroSection() {
   return (
-    <section
-      className="relative flex min-h-[calc(100vh-4rem)] w-full items-center overflow-hidden bg-cover bg-[68%_center] bg-no-repeat"
-      style={{
-        backgroundImage:
-          "url('/hero-bg.jpg'), linear-gradient(135deg, #1a3a5c 0%, #2d6a8a 60%, #3a8fa8 100%)",
-      }}
-    >
-      {/* Dark gradient overlay — heavier on the left so text stays readable */}
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/78 via-slate-950/48 to-slate-900/10" />
+    <section className="relative min-h-[90vh] w-full flex items-center overflow-hidden bg-slate-950">
+      {/* Background */}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 scale-105"
+        style={{
+          backgroundImage: "url('/hero-bg.jpg')",
+        }}
+      />
+      {/* Gradients to ensure text readability against any image */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
 
-      {/* Content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <div className="max-w-xl">
-          <h1 className="mb-5 text-4xl font-bold leading-tight text-cyan-400 sm:text-5xl lg:text-6xl">
-            Ever Feel Worried Navigating Around Singapore?
-          </h1>
+      {/* Main Content Container */}
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 py-20 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-1000">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1572D3]/10 border border-[#1572D3]/20 text-[#1572D3] text-xs font-bold tracking-widest uppercase">
+              <Shield size={14} />
+              Singapore Travel Partner
+            </div>
 
-          <p className="mb-4 max-w-xl text-base leading-relaxed text-white sm:text-lg">
-            No worries — Trippa has you covered.
-            <br />
-            Check real-time weather updates, taxi availability, and explore top tourist
-            attractions — all without creating an account.
-          </p>
+            <h1 className="text-5xl font-black italic tracking-tighter text-white leading-[1.25] ">
+              Navigate <span className="text-[#1572D3]"> Singapore</span>
+              <br />
+              With Confidence.
+            </h1>
 
-          <p className="mb-8 max-w-xl text-base leading-relaxed text-white sm:text-lg">
-            You can also sign-up for a free account to save locations and personalise your
-            experience.
-          </p>
+            <div className="space-y-4 max-w-md">
+              <p className="text-slate-400 text-lg font-medium leading-relaxed">
+                Stop worrying about navigating the Lion City. Trippa provides
+                <span className="text-white"> real-time updates</span> and
+                <span className="text-white"> interactive guides</span> for an
+                effortless experience.
+              </p>
+              <p className="text-slate-500 text-sm italic">
+                Explore weather, taxi availability, and top attractions
+                instantly.
+              </p>
+            </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <Link
-              href="/location"
-              className="rounded bg-blue-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              Locations
-            </Link>
-            <Link
-              href="/map"
-              className="rounded border border-white px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
-            >
-              Map
-            </Link>
+            <div className="flex flex-wrap items-center gap-4 pt-4">
+              <Link
+                href="/location"
+                className="group flex items-center gap-3 px-8 py-4 bg-[#1572D3] text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl shadow-[#1572D3]/40 hover:bg-[#125ba8] transition-all active:scale-95"
+              >
+                Locations
+                <Navigation
+                  size={16}
+                  className="transition-transform group-hover:translate-x-1"
+                />
+              </Link>
+
+              <Link
+                href="/map"
+                className="px-8 py-4 bg-white/5 backdrop-blur-md border border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/10 transition-all"
+              >
+                Map
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }
