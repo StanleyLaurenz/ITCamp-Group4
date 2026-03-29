@@ -19,17 +19,23 @@ export const getTaxis = async (
         
         // Convert data into JSON format
         const data = await response.json();
-        
-        // Only take the taxi coordinates [lng, lat]
-        const taxis = data.features[0].geometry.coordinates;
+        // Only take 'features' from data
+        const features = data.features[0];
+        // Take the metadata
+        const meta = features.properties;
+        // Take the taxi coordinates [lng, lat]
+        const taxis = features.geometry.coordinates;
         
         // Convert taxi coordinates into a more leaflet-friendly format [lat, lng]
         const coords = taxis.map(
             ([lng, lat]: [number, number]) => ({lat, lng})
         );
         
-        // return coordinates to frontend in JSON format
-        res.json(coords);
+        // Build final output
+        const result = {"meta": meta, "coords": coords}
+
+        // return result to frontend in JSON format
+        res.json(result);
 
     } catch (error) {
         // throws any caught error to the errorHandler
