@@ -3,10 +3,10 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
 import type { Landmark } from "./types";
-import { Popup } from "react-leaflet";
+import { Popup, useMap } from "react-leaflet";
 
 // Fix broken marker icons in Leaflet for Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -70,19 +70,57 @@ interface MapInnerProps {
   showTaxi: boolean;
   showRain: boolean;
   showSavedOnly: boolean;
+  initialSelectedId: number | null;
+}
+
+interface MapControllerProps {
+  initialSelectedId: number | null;
+  landmarks: Landmark[];
+  setSelectedId: (id: number | null) => void;
+}
+
+function MapController({
+  initialSelectedId,
+  landmarks,
+  setSelectedId,
+}: MapControllerProps) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (initialSelectedId) {
+      const target = landmarks.find(
+        (lm: Landmark) => lm.id === initialSelectedId
+      );
+      if (target) {
+        // Use setView for an instant jump if flyTo is too laggy,
+        // OR optimize flyTo like this:
+        map.flyTo([target.lat, target.lng], 16, {
+          duration: 0.8, // Faster duration = less frames to calculate
+          easeLinearity: 0.5,
+          noMoveStart: true, // Prevents unnecessary event firing
+        });
+        setSelectedId(target.id);
+      }
+    }
+  }, [initialSelectedId, landmarks, map, setSelectedId]);
+
+  return null;
 }
 
 export default function MapInner({
   landmarks,
   savedIds,
   onToggleSave,
+  initialSelectedId,
   isLoggedIn,
   showLandmarks,
   showTaxi: _showTaxi,
   showRain: _showRain,
   showSavedOnly,
 }: MapInnerProps) {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(
+    initialSelectedId
+  );
 
   const handleClose = () => {
     setSelectedId(null);
@@ -92,10 +130,18 @@ export default function MapInner({
     <div className="relative w-full h-full">
       <MapContainer
         center={[1.3521, 103.8198]}
+        preferCanvas={true}
         zoom={12}
         className="w-full h-full"
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+        <MapController
+          initialSelectedId={initialSelectedId}
+          landmarks={landmarks}
+          setSelectedId={setSelectedId}
+        />
+
         <MapClickHandler onClose={() => setSelectedId(null)} />
 
         {landmarks.map((lm) => {
@@ -111,9 +157,10 @@ export default function MapInner({
               position={[lm.lat, lm.lng]}
               icon={createCustomMarker(isSelected, isSaved)}
               eventHandlers={{
-                click: (e) => {
-                  e.originalEvent.stopPropagation();
-                  setSelectedId(lm.id);
+                add: (e) => {
+                  if (lm.id === initialSelectedId) {
+                    e.target.openPopup();
+                  }
                 },
               }}
             >

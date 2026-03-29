@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Filter } from "./Filter";
 import { Search } from "./Search";
@@ -8,15 +9,19 @@ import { getAttractions } from "../../lib/api";
 import { useSavedLocations } from "../../lib/useSavedLocations";
 import { SavedSection } from "./SavedSection";
 import { BrowseSection } from "./BrowseSection";
+import { DetailsPopUp } from "./DetailsPopUp";
 import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
 
 export function LocationPage() {
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const [attractions, setAttractions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLandmark, setSelectedLandmark] = useState<any>(null);
+  const [isPopUpOpen, setIsPopUpOpen] = useState(false);
 
   // Filter states
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -43,6 +48,22 @@ export function LocationPage() {
     }
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const idFromUrl = searchParams.get("selectedId");
+
+    if (idFromUrl && attractions.length > 0) {
+      // Find the specific landmark by its ID (OBJECTID_1)
+      const found = attractions.find(
+        (item) => String(item.properties.OBJECTID_1) === idFromUrl
+      );
+
+      if (found) {
+        setSelectedLandmark(found);
+        setIsPopUpOpen(true);
+      }
+    }
+  }, [searchParams, attractions]);
 
   // One consolidated filter function
   const filteredAttractions = attractions.filter((item) => {
@@ -110,8 +131,26 @@ export function LocationPage() {
           showMore={() => setVisibleCount((v) => v + 20)}
           setSearchQuery={setSearchQuery}
         />
+
+        {selectedLandmark && (
+          <DetailsPopUp
+            isOpen={isPopUpOpen}
+            onClose={() => setIsPopUpOpen(false)}
+            data={selectedLandmark}
+            isFavorite={savedIds.includes(
+              Number(selectedLandmark.properties.OBJECTID_1)
+            )}
+            onFavoriteToggle={() =>
+              toggleSave(Number(selectedLandmark.properties.OBJECTID_1))
+            }
+            // Ensure these props match your updated DetailsPopUp
+            imageUrl={selectedLandmark.imageUrl}
+            rating={getStaticRating(
+              Number(selectedLandmark.properties.OBJECTID_1)
+            )}
+          />
+        )}
       </div>
     </main>
   );
 }
-
