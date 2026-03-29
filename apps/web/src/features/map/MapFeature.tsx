@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { MapPin, CloudRain, Heart } from "react-feather";
 import { getAttractions } from "@/lib/api";
@@ -13,6 +14,9 @@ import type { Landmark } from "./types";
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
 
 export function MapFeature() {
+  const searchParams = useSearchParams();
+  const initialId = searchParams.get("selectedId");
+
   const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +71,7 @@ export function MapFeature() {
       {!loading && !error && landmarks.length > 0 && (
         <MapInner
           landmarks={landmarks}
+          initialSelectedId={initialId ? Number(initialId) : null}
           savedIds={savedIds}
           onToggleSave={toggleSave}
           isLoggedIn={isLoggedIn}

@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import { Star } from "react-feather";
+import Link from "next/link";
 import {
   X,
   Clock,
@@ -252,15 +253,13 @@ export function DetailsPopUp({
             </div>
 
             {/* Main Action: View Map */}
-            <a
-              href={googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 w-full py-5 bg-[#1572D3] text-white font-black uppercase tracking-widest text-xs rounded-[24px] shadow-2xl shadow-[#1572D3]/40 hover:bg-[#125ba8] transition-all active:scale-[0.98]"
+            <Link
+              href={`/map?selectedId=${data.properties.OBJECTID_1}`}
+              className="flex items-center justify-center gap-3 w-full py-5 bg-[#1572D3] !text-white font-black tracking-widest text-xs rounded-[24px] shadow-2xl shadow-[#1572D3]/40 hover:bg-[#125ba8] transition-all active:scale-[0.98]"
             >
               <Map size={18} />
               View on Map
-            </a>
+            </Link>
           </div>
         </div>
       </div>
