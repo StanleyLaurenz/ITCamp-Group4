@@ -19,6 +19,8 @@ interface DetailsPopUpProps {
   data: any;
   isFavorite: boolean;
   onFavoriteToggle: () => void;
+  imageUrl?: string;
+  rating: number;
 }
 
 export function DetailsPopUp({
@@ -27,6 +29,8 @@ export function DetailsPopUp({
   data,
   isFavorite,
   onFavoriteToggle,
+  imageUrl,
+  rating,
 }: DetailsPopUpProps) {
   useEffect(() => {
     if (isOpen) {
@@ -51,9 +55,9 @@ export function DetailsPopUp({
 
   const { properties } = data;
 
-  // Using a high-quality Singapore-themed Pexels image as a fallback
-  const imageUrl =
-    "https://images.pexels.com/photos/3152124/pexels-photo-3152124.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2";
+  const displayImage =
+    imageUrl ||
+    "https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600";
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     properties.PAGETITLE + " " + (properties.ADDRESS || "Singapore")
@@ -93,10 +97,18 @@ export function DetailsPopUp({
         className="relative z-[9999] w-full max-w-2xl max-h-[90vh] bg-white rounded-[40px] shadow-2xl overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="sticky top-0 z-[100] w-full h-0">
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 p-3 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 text-white hover:bg-white/40 hover:text-white transition-all active:scale-90 shadow-lg"
+          >
+            <X size={20} />
+          </button>
+        </div>
         {/* Header Action Area */}
         <div className="relative h-72 sm:h-96 w-full">
           <img
-            src={imageUrl}
+            src={displayImage}
             alt={properties.PAGETITLE}
             className="w-full h-full object-cover"
           />
@@ -114,12 +126,6 @@ export function DetailsPopUp({
                   isFavorite ? "fill-red-500 text-red-500" : "text-white"
                 }
               />
-            </button>
-            <button
-              onClick={onClose}
-              className="p-3 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 text-white hover:bg-white/40 transition-all active:scale-90"
-            >
-              <X size={20} />
             </button>
           </div>
         </div>
@@ -218,7 +224,7 @@ export function DetailsPopUp({
                 <div className="space-y-0.5">
                   <div className="flex items-baseline gap-1">
                     <p className="text-[18px] font-black italic tracking-tighter text-slate-900 leading-none">
-                      4.8
+                      {rating.toFixed(1)}
                     </p>
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
                       / 5.0

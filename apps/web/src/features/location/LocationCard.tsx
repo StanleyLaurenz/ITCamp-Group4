@@ -131,6 +131,8 @@ export function LocationCard({
         data={item}
         isFavorite={isFavorite}
         onFavoriteToggle={onFavoriteToggle}
+        imageUrl={backgroundUrl} // Pass the image used by the card
+        rating={rating}
       />
     </div>
   );
