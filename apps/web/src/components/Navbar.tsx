@@ -45,7 +45,7 @@ export default function Navbar() {
   }, [isProfileMenuOpen]);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
+    <nav className="sticky top-0 z-[9999] border-b border-gray-100 bg-white shadow-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Left: Logo + Nav links */}
         <div className="flex min-w-0 items-center gap-5 sm:gap-8">
@@ -116,7 +116,7 @@ export default function Navbar() {
                   </button>
 
                   {isProfileMenuOpen && (
-                    <div className="absolute right-0 top-full z-20 mt-3 w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute right-0 top-full mt-3 w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                       <div className="px-4 py-3 border-b border-gray-50">
                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">
                           Authenticated as
