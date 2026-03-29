@@ -4,16 +4,22 @@ import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { healthRouter } from "./routes/healthRoutes.js";
 import { attractionRouter } from "./routes/attractionRoutes.js";
+import { taxiRouter} from "./routes/taxiRoutes.js";
 
+// Creates server instance
 const app = express();
 
+// Allows cross-origin communication between the browser and server
 app.use(
   cors({
     origin: env.clientOrigin,
   })
 );
+
+// Enables JSON parsing
 app.use(express.json());
 
+// Root routing
 app.get("/", (_request, response) => {
   response.json({
     ok: true,
@@ -21,8 +27,11 @@ app.get("/", (_request, response) => {
   });
 });
 
+// Linking a router with a path
 app.use("/api", healthRouter);
 app.use("/api/attractions", attractionRouter);
+app.use("/api/taxi", taxiRouter);
+
 app.use(errorHandler);
 
 app.listen(env.port, () => {
