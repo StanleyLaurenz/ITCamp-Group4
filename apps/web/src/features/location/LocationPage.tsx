@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { getAttractions } from "../../lib/api";
 import { SavedSection } from "./SavedSection";
 import { BrowseSection } from "./BrowseSection";
+import { getCategories } from "@/utils/categorize";
+import { getStaticRating } from "@/utils/generateRating";
 
 export function LocationPage() {
   const { user, loading: authLoading } = useAuth();
@@ -16,6 +18,9 @@ export function LocationPage() {
 
   const [visibleCount, setVisibleCount] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [minRating, setMinRating] = useState(3);
 
   const isLoggedIn = !!user;
 
@@ -39,11 +44,23 @@ export function LocationPage() {
     );
   };
 
-  const filteredAttractions = attractions.filter((item) =>
-    item["properties"]["PAGETITLE"]
+  const filteredAttractions = attractions.filter((item) => {
+    const titleMatch = item["properties"]["PAGETITLE"]
       .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+      .includes(searchQuery.toLowerCase());
+
+    // Check Category: If none selected, show all. If selected, must match at least one.
+    const itemCats = getCategories(item); // Use the utility we made earlier
+    const categoryMatch =
+      selectedCategories.length === 0 ||
+      selectedCategories.some((cat) => itemCats.includes(cat));
+
+    // Check Rating: Use the utility we made earlier
+    const ratingMatch =
+      getStaticRating(Number(item["properties"]["OBJECTID_1"])) >= minRating;
+
+    return titleMatch && categoryMatch && ratingMatch;
+  });
 
   const savedLocations = attractions.filter((item) =>
     savedIds.includes(Number(item["properties"]["OBJECTID_1"]))
@@ -56,7 +73,12 @@ export function LocationPage() {
           <div className="flex-grow">
             <Search onSearch={setSearchQuery} />
           </div>
-          <Filter />
+          <Filter
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+            minRating={minRating}
+            setMinRating={setMinRating}
+          />
         </div>
       </div>
 
@@ -74,7 +96,6 @@ export function LocationPage() {
           filteredAttractions={filteredAttractions}
           visibleCount={visibleCount}
           savedIds={savedIds}
-          totalAttractionsCount={attractions.length}
           toggleSave={toggleSave}
           showMore={() => setVisibleCount((v) => v + 20)}
           setSearchQuery={setSearchQuery}
