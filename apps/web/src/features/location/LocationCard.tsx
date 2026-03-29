@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { MapPin, Heart, Star, Map, Info } from "react-feather";
+import { DetailsPopUp } from "./DetailsPopUp";
 
 interface LocationCardProps {
   id: string;
@@ -12,6 +13,7 @@ interface LocationCardProps {
   categories: string[];
   isFavorite: boolean;
   onFavoriteToggle: () => void;
+  item: any;
 }
 
 export function LocationCard({
@@ -23,7 +25,9 @@ export function LocationCard({
   categories,
   isFavorite,
   onFavoriteToggle,
+  item,
 }: LocationCardProps) {
+  const [showDetails, setShowDetails] = useState(false);
   const backgroundUrl =
     imageUrl ||
     "https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600";
@@ -39,7 +43,7 @@ export function LocationCard({
   };
 
   return (
-    <div className="group relative w-full max-w-[320px] mx-auto h-[420px] rounded-[32px] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl cursor-pointer">
+    <div className="group relative w-full  max-w-[320px] mx-auto h-[420px] rounded-[32px] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl cursor-pointer">
       {/* 1. Background Image */}
       <img
         src={backgroundUrl}
@@ -76,7 +80,14 @@ export function LocationCard({
             <span className="font-bold text-[10px]">{rating.toFixed(1)}</span>
           </div>
 
-          <button className="flex items-center gap-1.5 text-[10px] font-bold hover:bg-white/20 transition-colors bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowDetails(true);
+            }}
+            className="flex items-center gap-1.5 text-[10px] font-bold hover:bg-white/20 transition-colors bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10"
+          >
             <Info size={12} />
             Details
           </button>
@@ -113,6 +124,14 @@ export function LocationCard({
           View Map
         </button>
       </div>
+
+      <DetailsPopUp
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        data={item}
+        isFavorite={isFavorite}
+        onFavoriteToggle={onFavoriteToggle}
+      />
     </div>
   );
 }

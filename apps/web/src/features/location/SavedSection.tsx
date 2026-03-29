@@ -124,6 +124,7 @@ export function SavedSection({
               >
                 <LocationCard
                   id={id.toString()}
+                  item={item}
                   title={item["properties"]["PAGETITLE"]}
                   rating={4.8}
                   mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}

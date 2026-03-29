@@ -48,6 +48,7 @@ export function BrowseSection({
               <LocationCard
                 key={id}
                 id={id.toString()}
+                item={item}
                 title={item["properties"]["PAGETITLE"]}
                 rating={rating}
                 mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
