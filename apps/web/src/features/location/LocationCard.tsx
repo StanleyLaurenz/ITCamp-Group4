@@ -78,7 +78,7 @@ export function LocationCard({
 
           <button className="flex items-center gap-1.5 text-[10px] font-bold hover:bg-white/20 transition-colors bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
             <Info size={12} />
-            DETAILS
+            Details
           </button>
         </div>
 
