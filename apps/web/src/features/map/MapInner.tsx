@@ -101,10 +101,7 @@ export default function MapInner({
         {landmarks.map((lm) => {
           const isSaved = savedIds.includes(lm.id);
           const isSelected = selectedId === lm.id;
-
-          let shouldShow = false;
-          if (isSaved) shouldShow = showSavedOnly;
-          else shouldShow = showLandmarks;
+          const shouldShow = showLandmarks || (showSavedOnly && isSaved);
 
           if (!shouldShow) return null;
 
