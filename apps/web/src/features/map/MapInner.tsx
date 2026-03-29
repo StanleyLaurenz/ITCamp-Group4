@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { useState } from "react";
 import LandmarkPopup from "./LandmarkPopup";
 import type { Landmark } from "./types";
+import { Popup } from "react-leaflet";
 
 // Fix broken marker icons in Leaflet for Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -83,8 +84,9 @@ export default function MapInner({
 }: MapInnerProps) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  // Helper to find the selected landmark for the popup
-  const selectedLandmark = landmarks.find((lm) => lm.id === selectedId) ?? null;
+  const handleClose = () => {
+    setSelectedId(null);
+  };
 
   return (
     <div className="relative w-full h-full">
@@ -100,21 +102,9 @@ export default function MapInner({
           const isSaved = savedIds.includes(lm.id);
           const isSelected = selectedId === lm.id;
 
-          /**
-           * UPDATED VISIBILITY LOGIC:
-           * A marker is visible ONLY if its corresponding filter is active.
-           * - If it's a Saved marker (Red), show it ONLY if showSavedOnly is true.
-           * - If it's a Standard marker (Blue), show it ONLY if showLandmarks is true.
-           */
           let shouldShow = false;
-
-          if (isSaved) {
-            // Red markers follow the 'Saved' toggle
-            shouldShow = showSavedOnly;
-          } else {
-            // Blue markers follow the 'Landmarks' toggle
-            shouldShow = showLandmarks;
-          }
+          if (isSaved) shouldShow = showSavedOnly;
+          else shouldShow = showLandmarks;
 
           if (!shouldShow) return null;
 
@@ -129,20 +119,25 @@ export default function MapInner({
                   setSelectedId(lm.id);
                 },
               }}
-            />
+            >
+              {/* Anchor the card to the marker */}
+              <Popup
+                className="custom-landmark-popup"
+                offset={[0, -32]}
+                closeButton={false}
+              >
+                <LandmarkPopup
+                  landmark={lm}
+                  isSaved={isSaved}
+                  onToggleSave={() => onToggleSave(lm.id)}
+                  onClose={handleClose} // This closes the popup
+                  isLoggedIn={isLoggedIn}
+                />
+              </Popup>
+            </Marker>
           );
         })}
       </MapContainer>
-
-      {selectedLandmark && (
-        <LandmarkPopup
-          landmark={selectedLandmark}
-          isSaved={savedIds.includes(selectedLandmark.id)}
-          onToggleSave={() => onToggleSave(selectedLandmark.id)}
-          onClose={() => setSelectedId(null)}
-          isLoggedIn={isLoggedIn}
-        />
-      )}
     </div>
   );
 }

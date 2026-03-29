@@ -2,6 +2,7 @@
 
 import { Heart, Star, Info, MapPin, X } from "react-feather";
 import type { Landmark } from "./types";
+import { useMap } from "react-leaflet";
 
 interface LandmarkPopupProps {
   landmark: Landmark;
@@ -31,9 +32,11 @@ export default function LandmarkPopup({
     landmark.imageUrl ||
     "https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600";
 
+  const map = useMap();
+
   return (
-    <div className="absolute bottom-6 right-4 z-[500] w-[300px] max-w-[calc(100vw-2rem)]">
-      <div className="relative h-[420px] rounded-[32px] overflow-hidden shadow-2xl">
+    <div className="w-[280px] sm:w-[300px] animate-in fade-in zoom-in duration-200">
+      <div className="relative h-[380px] rounded-[24px] overflow-hidden shadow-2xl">
         {/* Background image */}
         <img
           src={backgroundUrl}
@@ -41,69 +44,67 @@ export default function LandmarkPopup({
           className="absolute inset-0 w-full h-full object-cover z-0"
         />
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-10" />
+        {/* Gradient: 'from-black' blends into the black Leaflet tip below */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent z-10" />
 
-        {/* Close button — top left */}
+        {/* Close button */}
         <button
-          onClick={onClose}
-          className="absolute top-5 left-5 z-20 p-2.5 bg-black/20 backdrop-blur-md rounded-full border border-white/20 transition-all hover:bg-black/40 active:scale-90"
-          aria-label="Close"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 1. Tell Leaflet to close the popup immediately
+            map.closePopup();
+
+            // 2. Tell your Parent state to reset selectedId
+            onClose();
+          }}
+          className="absolute top-4 left-4 z-20 p-2 bg-black/40 backdrop-blur-md rounded-full border border-white/20 text-white hover:bg-black/60 transition-all"
         >
-          <X size={16} className="text-white" />
+          <X size={14} />
         </button>
 
-        {/* Heart / save button — top right */}
+        {/* Heart button */}
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             if (!isLoggedIn) return;
             onToggleSave();
           }}
-          title={isLoggedIn ? undefined : "Log in to save"}
-          className="absolute top-5 right-5 z-20 p-2.5 bg-black/20 backdrop-blur-md rounded-full border border-white/20 transition-all hover:bg-black/40 active:scale-90"
-          aria-label={isSaved ? "Unsave" : "Save"}
+          className="absolute top-4 right-4 z-20 p-2.5 bg-black/40 backdrop-blur-md rounded-full border border-white/20 transition-all active:scale-90"
         >
           <Heart
             size={16}
-            className={`transition-all duration-300 ${
-              isSaved ? "fill-red-500 text-red-500" : "text-white"
-            }`}
+            className={isSaved ? "fill-red-500 text-red-500" : "text-white"}
           />
         </button>
 
-        {/* Bottom content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white space-y-4">
-          {/* Rating + Details row */}
-          <div className="flex gap-3 items-center">
-            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
-              <Star size={12} className="text-yellow-400 fill-yellow-400" />
+        {/* Content Section */}
+        <div className="absolute bottom-0 left-0 right-0 p-5 z-20 text-white space-y-3">
+          <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-lg px-2.5 py-1 rounded-lg border border-white/10">
+              <Star size={10} className="text-yellow-400 fill-yellow-400" />
               <span className="font-bold text-[10px]">
                 {landmark.rating.toFixed(1)}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
-              <Info size={12} />
-              DETAILS
-            </div>
           </div>
 
-          {/* Title + address */}
           <div className="space-y-1">
-            <h3 className="text-xl font-bold leading-tight line-clamp-2 tracking-tight">
+            <h3 className="text-lg font-black italic tracking-tighter leading-tight line-clamp-2 uppercase">
               {landmark.title}
             </h3>
-            <div className="flex items-center gap-1.5 text-white/70 text-xs">
-              <MapPin size={12} className="text-[#1572D3] shrink-0" />
+            <div className="flex items-center gap-1.5 text-white/70 text-[11px]">
+              <MapPin size={10} className="text-[#1572D3]" />
               <span className="font-medium truncate">{landmark.address}</span>
             </div>
           </div>
 
-          {/* Category badges */}
-          <div className="flex items-center flex-wrap gap-2">
+          <div className="flex items-center flex-wrap gap-1.5">
             {landmark.categories.map((cat) => (
               <span
                 key={cat}
-                className={`px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase border backdrop-blur-md ${
+                className={`px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest uppercase border backdrop-blur-md ${
                   categoryStyles[cat] || categoryStyles["Landmark"]
                 }`}
               >

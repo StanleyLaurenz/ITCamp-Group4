@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -31,4 +31,27 @@
   select {
     font: inherit;
   }
+}
+
+/* Container for the whole popup */
+.custom-landmark-popup .leaflet-popup-content-wrapper {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* The "Pointer" / Triangle */
+.custom-landmark-popup .leaflet-popup-tip {
+  background: #000000 !important; /* Matches the bottom of your gradient */
+  box-shadow: none !important;
+}
+
+.custom-landmark-popup .leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+/* Ensures the tip is positioned correctly against our rounded corners */
+.custom-landmark-popup .leaflet-popup-tip-container {
+  margin-top: -1px;
 }
