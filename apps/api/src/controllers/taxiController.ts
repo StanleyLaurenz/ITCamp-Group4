@@ -32,7 +32,7 @@ export const getTaxis = async (
         );
         
         // Build final output
-        const result = {"meta": meta, "coords": coords}
+        const result = {meta, coords}
 
         // return result to frontend in JSON format
         res.json(result);
