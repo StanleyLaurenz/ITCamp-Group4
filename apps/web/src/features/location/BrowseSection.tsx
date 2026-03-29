@@ -11,7 +11,6 @@ interface BrowseSectionProps {
   filteredAttractions: any[];
   visibleCount: number;
   savedIds: number[];
-  totalAttractionsCount: number;
   toggleSave: (id: number) => void;
   showMore: () => void;
   setSearchQuery: (query: string) => void;
@@ -23,7 +22,6 @@ export function BrowseSection({
   filteredAttractions,
   visibleCount,
   savedIds,
-  totalAttractionsCount,
   toggleSave,
   showMore,
   setSearchQuery,
@@ -50,6 +48,7 @@ export function BrowseSection({
               <LocationCard
                 key={id}
                 id={id.toString()}
+                item={item}
                 title={item["properties"]["PAGETITLE"]}
                 rating={rating}
                 mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
@@ -78,7 +77,7 @@ export function BrowseSection({
       )}
 
       {!loading &&
-        totalAttractionsCount > visibleCount &&
+        filteredAttractions.length > visibleCount &&
         searchQuery === "" && (
           <div className="mt-16 flex justify-center">
             <button

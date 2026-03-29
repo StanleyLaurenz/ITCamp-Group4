@@ -34,7 +34,7 @@ export function SavedSection({
   // 1. Locked Message
   if (!isLoggedIn && searchQuery === "") {
     return (
-      <section className="bg-white rounded-[32px] p-10 border border-slate-200 shadow-sm overflow-hidden relative">
+      <section className="bg-slate-100/50 rounded-[32px] p-10 border border-slate-200 shadow-sm overflow-hidden relative">
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-64 h-64 bg-[#1572D3]/5 rounded-full blur-3xl" />
         <div className="flex flex-col items-center text-center space-y-4 max-w-md mx-auto">
           <div className="relative p-5 bg-[#1572D3]/10 rounded-full">
@@ -124,6 +124,7 @@ export function SavedSection({
               >
                 <LocationCard
                   id={id.toString()}
+                  item={item}
                   title={item["properties"]["PAGETITLE"]}
                   rating={4.8}
                   mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
