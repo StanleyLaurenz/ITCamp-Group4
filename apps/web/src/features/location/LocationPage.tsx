@@ -1,19 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Filter } from "./Filter";
 import { Search } from "./Search";
 import { getAttractions } from "../../lib/api";
+import { useSavedLocations } from "../../lib/useSavedLocations";
 import { SavedSection } from "./SavedSection";
 import { BrowseSection } from "./BrowseSection";
 
 export function LocationPage() {
   const [attractions, setAttractions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [savedIds, setSavedIds] = useState<number[]>([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [visibleCount, setVisibleCount] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+  const { savedIds, toggleSave } = useSavedLocations(user?.id ?? null, isLoggedIn);
 
   useEffect(() => {
     async function fetchData() {
@@ -28,12 +31,6 @@ export function LocationPage() {
     }
     fetchData();
   }, []);
-
-  const toggleSave = (id: number) => {
-    setSavedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
 
   const filteredAttractions = attractions.filter((item) =>
     item["properties"]["PAGETITLE"]
