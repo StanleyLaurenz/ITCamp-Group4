@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { MapPin } from "react-feather";
+import { MapPin, CloudRain, Heart } from "react-feather";
 import { getAttractions } from "@/lib/api";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getCategories } from "@/utils/categorize";
@@ -10,105 +10,60 @@ import { getStaticRating } from "@/utils/generateRating";
 import { useAuth } from "@/context/AuthContext";
 import type { Landmark } from "./types";
 
-// Dynamically import MapInner with SSR disabled — Leaflet requires window
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
 
 export function MapFeature() {
   const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Layer States
   const [showLandmarks, setShowLandmarks] = useState(true);
   const [showTaxi, setShowTaxi] = useState(false);
+  const [showRain, setShowRain] = useState(false);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
 
   const { user } = useAuth();
   const isLoggedIn = !!user;
-  const { savedIds, toggleSave } = useSavedLocations(user?.id ?? null, isLoggedIn);
+  const { savedIds, toggleSave } = useSavedLocations(
+    user?.id ?? null,
+    isLoggedIn
+  );
 
   useEffect(() => {
     async function fetchData() {
       try {
         const data = await getAttractions();
-
-        const normalized: Landmark[] = (data as unknown[])
-          .filter((item: unknown) => {
-            const feature = item as {
-              geometry?: { coordinates?: number[] };
-            };
-            const coords = feature.geometry?.coordinates;
-            return (
-              Array.isArray(coords) &&
-              coords.length >= 2 &&
-              isFinite(coords[0]) &&
-              isFinite(coords[1])
-            );
-          })
-          .map((item: unknown) => {
-            const feature = item as {
-              geometry: { coordinates: number[] };
-              properties: {
-                OBJECTID_1: number;
-                PAGETITLE: string;
-                ADDRESS?: string;
-                OVERVIEW?: string;
-              };
-              imageUrl?: string | null;
-            };
-            const [lng, lat] = feature.geometry.coordinates;
-            const id = Number(feature.properties.OBJECTID_1);
+        const normalized: Landmark[] = (data as any[])
+          .filter((item) => item.geometry?.coordinates?.length >= 2)
+          .map((item) => {
+            const id = Number(item.properties.OBJECTID_1);
             return {
               id,
-              title: feature.properties.PAGETITLE,
-              address: feature.properties.ADDRESS || "Singapore",
-              overview: feature.properties.OVERVIEW || "",
-              imageUrl: feature.imageUrl ?? null,
-              lat,
-              lng,
+              title: item.properties.PAGETITLE,
+              address: item.properties.ADDRESS || "Singapore",
+              overview: item.properties.OVERVIEW || "",
+              imageUrl: item.imageUrl ?? null,
+              lat: item.geometry.coordinates[1],
+              lng: item.geometry.coordinates[0],
               categories: getCategories(item),
               rating: getStaticRating(id),
             };
           });
-
         setLandmarks(normalized);
       } catch (err) {
-        setError("Failed to load map data. Please try again.");
-        console.error(err);
+        setError("Failed to load map data.");
       } finally {
         setLoading(false);
       }
     }
-
     fetchData();
   }, []);
 
   return (
-    <div
-      className="relative flex-1 w-full overflow-hidden"
-      style={{ minHeight: 0 }}
-    >
-      {/* Loading state */}
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
-          <p className="text-slate-500 font-bold animate-pulse">
-            Loading map…
-          </p>
-        </div>
-      )}
+    <div className="relative flex-1 w-full overflow-hidden">
+      {/* Loading/Error states ... */}
 
-      {/* Error state */}
-      {error && !loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
-          <p className="text-red-500 font-bold">{error}</p>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!loading && !error && landmarks.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
-          <p className="text-slate-500 font-bold">No landmarks found.</p>
-        </div>
-      )}
-
-      {/* Map — rendered once data is ready */}
       {!loading && !error && landmarks.length > 0 && (
         <MapInner
           landmarks={landmarks}
@@ -117,55 +72,83 @@ export function MapFeature() {
           isLoggedIn={isLoggedIn}
           showLandmarks={showLandmarks}
           showTaxi={showTaxi}
+          showRain={showRain}
+          showSavedOnly={showSavedOnly}
         />
       )}
 
-      {/* Floating layer control */}
+      {/* Wide Single-Line Filter Control */}
       {!loading && !error && (
-        <div className="absolute right-4 top-4 z-[500] rounded-3xl border border-white/70 bg-white/95 p-3 shadow-xl backdrop-blur-md">
-          <div className="flex items-start gap-3">
+        <div className="absolute left-1/2 -translate-x-1/2 top-6 z-[500] w-fit max-w-[95vw]">
+          <div className="flex items-center gap-1.5 rounded-[28px] border border-white/40 bg-white/80 p-1.5 shadow-2xl backdrop-blur-2xl">
+            {/* Landmark Toggle */}
             <button
-              type="button"
-              onClick={() => setShowTaxi((value) => !value)}
-              className={`flex min-w-[88px] flex-col items-center gap-2 rounded-2xl px-3 py-3 transition-all ${
-                showTaxi
-                  ? "bg-slate-900 text-white shadow-md"
-                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+              onClick={() => setShowLandmarks(!showLandmarks)}
+              className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
+                showLandmarks
+                  ? "bg-[#1572D3] text-white shadow-md shadow-[#1572D3]/30"
+                  : "bg-transparent text-slate-500 hover:bg-slate-200/50"
               }`}
-              aria-pressed={showTaxi}
-              aria-label="Toggle taxi stands"
+            >
+              <MapPin size={18} />
+              <span className="text-[11px] font-black uppercase tracking-wider">
+                Landmarks
+              </span>
+            </button>
+
+            {/* Taxi Toggle */}
+            <button
+              onClick={() => setShowTaxi(!showTaxi)}
+              className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
+                showTaxi
+                  ? "bg-[#1572D3] text-white shadow-md shadow-[#1572D3]/30"
+                  : "bg-transparent text-slate-500 hover:bg-slate-200/50"
+              }`}
             >
               <svg
-                width="26"
-                height="26"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeWidth="2.5"
               >
-                <path d="M5 11l1.4-4.2A2 2 0 0 1 8.3 5.5h7.4a2 2 0 0 1 1.9 1.3L19 11" />
-                <path d="M4 11h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1.5a.5.5 0 0 1-.5.5H17a.5.5 0 0 1-.5-.5V17h-9v1.5a.5.5 0 0 1-.5.5H5.5a.5.5 0 0 1-.5-.5V17H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1Z" />
-                <circle cx="7.5" cy="14.5" r="1" fill="currentColor" stroke="none" />
-                <circle cx="16.5" cy="14.5" r="1" fill="currentColor" stroke="none" />
+                <path d="M5 11l1.4-4.2A2 2 0 0 1 8.3 5.5h7.4a2 2 0 0 1 1.9 1.3L19 11M4 11h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1.5a.5.5 0 0 1-.5.5H17a.5.5 0 0 1-.5-.5V17h-9v1.5a.5.5 0 0 1-.5.5H5.5a.5.5 0 0 1-.5-.5V17H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1Z" />
               </svg>
-              <span className="text-xs font-bold">Taxi</span>
+              <span className="text-[11px] font-black uppercase tracking-wider">
+                Taxi
+              </span>
             </button>
 
+            {/* Rain Toggle */}
             <button
-              type="button"
-              onClick={() => setShowLandmarks((value) => !value)}
-              className={`flex min-w-[88px] flex-col items-center gap-2 rounded-2xl px-3 py-3 transition-all ${
-                showLandmarks
-                  ? "bg-[#1572D3] text-white shadow-md"
-                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+              onClick={() => setShowRain(!showRain)}
+              className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
+                showRain
+                  ? "bg-[#1572D3] text-white shadow-md shadow-[#1572D3]/30"
+                  : "bg-transparent text-slate-500 hover:bg-slate-200/50"
               }`}
-              aria-pressed={showLandmarks}
-              aria-label="Toggle landmarks"
             >
-              <MapPin size={26} />
-              <span className="text-xs font-bold">Landmarks</span>
+              <CloudRain size={18} />
+              <span className="text-[11px] font-black uppercase tracking-wider">
+                Rain
+              </span>
+            </button>
+
+            {/* Saved Toggle */}
+            <button
+              onClick={() => setShowSavedOnly(!showSavedOnly)}
+              disabled={!isLoggedIn}
+              className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
+                showSavedOnly
+                  ? "bg-[#1572D3] text-white shadow-md shadow-[#1572D3]/30"
+                  : "bg-transparent text-slate-500 hover:bg-slate-200/50"
+              } ${!isLoggedIn && "opacity-30 cursor-not-allowed"}`}
+            >
+              <Heart size={18} className={showSavedOnly ? "fill-white" : ""} />
+              <span className="text-[11px] font-black uppercase tracking-wider">
+                Saved
+              </span>
             </button>
           </div>
         </div>
