@@ -157,27 +157,37 @@ export default function MapInner({
               position={[lm.lat, lm.lng]}
               icon={createCustomMarker(isSelected, isSaved)}
               eventHandlers={{
+                click: () => {
+                  setSelectedId(lm.id);
+                },
                 add: (e) => {
                   if (lm.id === initialSelectedId) {
                     e.target.openPopup();
                   }
                 },
+                popupclose: () => {
+                  if (selectedId === lm.id) {
+                    setSelectedId(null);
+                  }
+                },
               }}
             >
               {/* Anchor the card to the marker */}
-              <Popup
-                className="custom-landmark-popup"
-                offset={[0, -32]}
-                closeButton={false}
-              >
-                <LandmarkPopup
-                  landmark={lm}
-                  isSaved={isSaved}
-                  onToggleSave={() => onToggleSave(lm.id)}
-                  onClose={handleClose} // This closes the popup
-                  isLoggedIn={isLoggedIn}
-                />
-              </Popup>
+              {isSelected && (
+                <Popup
+                  className="custom-landmark-popup"
+                  offset={[0, -32]}
+                  closeButton={false}
+                >
+                  <LandmarkPopup
+                    landmark={lm}
+                    isSaved={isSaved}
+                    onToggleSave={() => onToggleSave(lm.id)}
+                    onClose={handleClose}
+                    isLoggedIn={isLoggedIn}
+                  />
+                </Popup>
+              )}
             </Marker>
           );
         })}

@@ -2,7 +2,22 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-function parseSavedIds(rawValue: string | null) {
+const SAVED_LOCATIONS_UPDATED_EVENT = "saved-locations-updated";
+
+function normalizeIds(values: unknown) {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  return values
+    .map((value) => Number(value))
+    .filter(
+      (value, index, array) =>
+        Number.isFinite(value) && array.indexOf(value) === index,
+    );
+}
+
+function parseIds(rawValue: string | null) {
   if (!rawValue) {
     return [];
   }
@@ -10,13 +25,15 @@ function parseSavedIds(rawValue: string | null) {
   try {
     const parsed = JSON.parse(rawValue) as unknown;
 
-    if (!Array.isArray(parsed)) {
-      return [];
+    if (Array.isArray(parsed)) {
+      return normalizeIds(parsed);
     }
 
-    return parsed
-      .map((value) => Number(value))
-      .filter((value) => Number.isFinite(value));
+    if (parsed && typeof parsed === "object" && "savedOrder" in parsed) {
+      return normalizeIds((parsed as { savedOrder?: unknown }).savedOrder);
+    }
+
+    return [];
   } catch {
     return [];
   }
@@ -27,44 +44,94 @@ export function useSavedLocations(userId: string | null, enabled: boolean) {
     () => (userId ? `savedLocations:${userId}` : null),
     [userId],
   );
+  const orderStorageKey = useMemo(
+    () => (userId ? `savedLocationsOrder:${userId}` : null),
+    [userId],
+  );
   const [savedIds, setSavedIds] = useState<number[]>([]);
+  const [savedOrder, setSavedOrder] = useState<number[]>([]);
 
   useEffect(() => {
-    if (!enabled || !storageKey) {
+    if (!enabled || !storageKey || !orderStorageKey) {
       setSavedIds([]);
+      setSavedOrder([]);
       return;
     }
 
-    setSavedIds(parseSavedIds(window.localStorage.getItem(storageKey)));
+    const syncFromStorage = () => {
+      const ids = parseIds(window.localStorage.getItem(storageKey));
+      const order = parseIds(window.localStorage.getItem(orderStorageKey));
+      const mergedOrder = [
+        ...order.filter((id) => ids.includes(id)),
+        ...ids.filter((id) => !order.includes(id)),
+      ];
+
+      setSavedIds(ids);
+      setSavedOrder(mergedOrder);
+    };
+
+    syncFromStorage();
 
     function handleStorage(event: StorageEvent) {
-      if (event.key === storageKey) {
-        setSavedIds(parseSavedIds(event.newValue));
+      if (event.key === storageKey || event.key === orderStorageKey) {
+        syncFromStorage();
+      }
+    }
+
+    function handleSavedLocationsUpdated(event: Event) {
+      const detail = (
+        event as CustomEvent<{ storageKey?: string; orderStorageKey?: string }>
+      ).detail;
+
+      if (
+        detail?.storageKey === storageKey ||
+        detail?.orderStorageKey === orderStorageKey
+      ) {
+        syncFromStorage();
       }
     }
 
     window.addEventListener("storage", handleStorage);
+    window.addEventListener(
+      SAVED_LOCATIONS_UPDATED_EVENT,
+      handleSavedLocationsUpdated,
+    );
 
     return () => {
       window.removeEventListener("storage", handleStorage);
+      window.removeEventListener(
+        SAVED_LOCATIONS_UPDATED_EVENT,
+        handleSavedLocationsUpdated,
+      );
     };
-  }, [enabled, storageKey]);
+  }, [enabled, orderStorageKey, storageKey]);
 
   const toggleSave = (id: number) => {
-    if (!enabled || !storageKey) {
+    if (!enabled || !storageKey || !orderStorageKey) {
       return;
     }
 
-    setSavedIds((prev) => {
-      const next = prev.includes(id)
-        ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id];
+    const currentIds = parseIds(window.localStorage.getItem(storageKey));
+    const currentOrder = parseIds(window.localStorage.getItem(orderStorageKey));
+    const nextIds = currentIds.includes(id)
+      ? currentIds.filter((itemId) => itemId !== id)
+      : [...currentIds, id];
+    const nextOrder = nextIds.includes(id)
+      ? [id, ...currentOrder.filter((itemId) => itemId !== id)]
+      : currentOrder.filter((itemId) => itemId !== id);
 
-      window.localStorage.setItem(storageKey, JSON.stringify(next));
+    window.localStorage.setItem(storageKey, JSON.stringify(nextIds));
+    window.localStorage.setItem(orderStorageKey, JSON.stringify(nextOrder));
 
-      return next;
-    });
+    setSavedIds(nextIds);
+    setSavedOrder(nextOrder);
+
+    window.dispatchEvent(
+      new CustomEvent(SAVED_LOCATIONS_UPDATED_EVENT, {
+        detail: { storageKey, orderStorageKey },
+      }),
+    );
   };
 
-  return { savedIds, toggleSave };
+  return { savedIds, savedOrder, toggleSave };
 }
