@@ -9,3 +9,9 @@ export interface Landmark {
   categories: string[]; // via getCategories()
   rating: number;       // via getStaticRating()
 }
+
+export type WeatherStation = {
+  lat: number;
+  lng: number;
+  value: number;
+};

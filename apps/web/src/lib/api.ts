@@ -32,3 +32,13 @@ export async function getAttractions() {
   return response.json();
 }
 
+export async function getWeather() {
+  const response = await fetch(`${getApiBaseUrl()}/api/weather`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to load weather data: ${response.status}`);
+  }
+
+  return response.json();
+}
+

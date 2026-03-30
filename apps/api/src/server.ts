@@ -5,6 +5,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import { healthRouter } from "./routes/healthRoutes.js";
 import { attractionRouter } from "./routes/attractionRoutes.js";
 import { taxiRouter} from "./routes/taxiRoutes.js";
+import { weatherRouter} from "./routes/weatherRoutes.js";
 
 // Creates server instance
 const app = express();
@@ -31,6 +32,7 @@ app.get("/", (_request, response) => {
 app.use("/api", healthRouter);
 app.use("/api/attractions", attractionRouter);
 app.use("/api/taxi", taxiRouter);
+app.use("/api/weather", weatherRouter);
 
 app.use(errorHandler);
 

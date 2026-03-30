@@ -1,5 +1,6 @@
 "use client";
 
+import WeatherWidget from "@/components/weatherWidget";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -67,6 +68,8 @@ export function MapFeature() {
   return (
     <div className="relative flex-1 w-full overflow-hidden">
       {/* Loading/Error states ... */}
+
+      {!loading && !error && <WeatherWidget />} 
 
       {!loading && !error && landmarks.length > 0 && (
         <MapInner
