@@ -145,7 +145,7 @@ export function LocationCard({
         <Link
           href={`/map?selectedId=${id}`}
           onClick={(e) => e.stopPropagation()} // Prevent card details from opening
-          className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-[#1572D3] !text-white rounded-2xl text-xs font-black tracking-widest shadow-lg hover:bg-[#125ba8] transition-all active:scale-[0.98] mt-2"
+          className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-[#1572D3] !text-white rounded-2xl text-xs font-black tracking-widest shadow-lg hover:bg-[#125ba8] transition-all active:scale-[0.98] mt-2 uppercase"
         >
           <Map size={14} className="text-white" />
           View Map

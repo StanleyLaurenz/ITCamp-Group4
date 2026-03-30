@@ -10,6 +10,7 @@ import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
 import { useAuth } from "@/context/AuthContext";
 import type { Landmark } from "./types";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
 
@@ -63,6 +64,28 @@ export function MapFeature() {
     }
     fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="relative w-full h-[calc(100vh-64px)] bg-slate-50 flex flex-col items-center justify-center">
+        {/* Ghost Map Background (Optional Decorative) */}
+        <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cartographer.png')]" />
+
+        <div className="relative z-10 flex flex-col items-center gap-6">
+          <LoadingSpinner />
+          <div className="flex gap-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-2 w-2 rounded-full bg-blue-600 animate-bounce"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex-1 w-full overflow-hidden">

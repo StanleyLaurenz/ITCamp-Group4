@@ -140,7 +140,7 @@ export function DetailsPopUp({
           <div className="space-y-8">
             {/* Title & Location */}
             <div className="space-y-3">
-              <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-[0.9] uppercase">
+              <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-[0.9]">
                 {properties.PAGETITLE}
               </h2>
               <div className="flex items-center gap-2 text-slate-500 font-bold text-sm">
@@ -227,7 +227,7 @@ export function DetailsPopUp({
               className="flex items-center justify-center gap-3 w-full py-5 bg-[#1572D3] !text-white font-black tracking-widest text-xs rounded-[24px] shadow-2xl shadow-[#1572D3]/40 hover:bg-[#125ba8] transition-all active:scale-[0.98]"
             >
               <Map size={18} />
-              VIEW ON MAP
+              View on Map
             </Link>
           </div>
         </div>
