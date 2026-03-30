@@ -4,8 +4,10 @@ export type HealthResponse = {
   timestamp: string;
 };
 
-export function getApiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
+// In your getApiBaseUrl() function (or wherever it's defined):
+function getApiBaseUrl(): string {
+  const baseUrl = "http://localhost:3001"; // Ensure no trailing slash
+  return baseUrl;
 }
 
 export async function getHealth(): Promise<HealthResponse> {
@@ -18,8 +20,10 @@ export async function getHealth(): Promise<HealthResponse> {
   return response.json() as Promise<HealthResponse>;
 }
 
+// In your api.ts file:
 export async function getAttractions() {
-  const response = await fetch(`${getApiBaseUrl()}/api/attractions`); //
+  // Ensure the path passed here starts with a slash
+  const response = await fetch(`${getApiBaseUrl()}/api/attractions`);
 
   if (!response.ok) {
     throw new Error(`Failed to load attractions: ${response.status}`);
@@ -27,3 +31,4 @@ export async function getAttractions() {
 
   return response.json();
 }
+
