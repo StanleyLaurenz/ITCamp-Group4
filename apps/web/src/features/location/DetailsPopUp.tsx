@@ -1,18 +1,19 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Star } from "react-feather";
-import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation"; // Added for redirect
+import { useAuth } from "@/context/AuthContext"; // Added for auth check
 import {
   X,
   Clock,
   MapPin,
   Globe,
-  Info,
   Heart,
   Map,
   ExternalLink,
+  Star,
 } from "react-feather";
+import Link from "next/link";
 
 interface DetailsPopUpProps {
   isOpen: boolean;
@@ -33,6 +34,10 @@ export function DetailsPopUp({
   imageUrl,
   rating,
 }: DetailsPopUpProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user } = useAuth();
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -60,33 +65,30 @@ export function DetailsPopUp({
     imageUrl ||
     "https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600";
 
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    properties.PAGETITLE + " " + (properties.ADDRESS || "Singapore")
-  )}`;
+  // Auth Guard for Favorite Toggle
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      // Encode current path to return here after login
+      const returnUrl = encodeURIComponent(pathname);
+      router.push(`/login?returnTo=${returnUrl}`);
+      return;
+    }
+
+    onFavoriteToggle();
+  };
 
   function formatOpeningHours(rawHours: string) {
     if (!rawHours) return { day: "Daily", time: "24 Hours" };
-
-    // Fix encoding: replaces "â€“" or multiple dashes with a clean "-"
-    const cleanHours = rawHours
-      .replace(/â€“/g, "-")
-      .replace(/–/g, "-") // Also fixes actual en-dashes to standard dashes
-      .trim();
-
-    // Split by the first colon
+    const cleanHours = rawHours.replace(/â€“/g, "-").replace(/–/g, "-").trim();
     const parts = cleanHours.split(/:(.*)/);
 
     if (parts.length >= 2) {
-      return {
-        day: parts[0].trim(),
-        time: parts[1].trim(),
-      };
+      return { day: parts[0].trim(), time: parts[1].trim() };
     }
-
-    return {
-      day: "Opening Hours",
-      time: cleanHours,
-    };
+    return { day: "Opening Hours", time: cleanHours };
   }
 
   return (
@@ -98,15 +100,17 @@ export function DetailsPopUp({
         className="relative z-[9999] w-full max-w-2xl max-h-[90vh] bg-white rounded-[40px] shadow-2xl overflow-y-auto no-scrollbar animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-[100] w-full h-0">
+        {/* Close Button */}
+        <div className="sticky top-0 z-[110] w-full h-0">
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-3 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 text-white hover:bg-white/40 hover:text-white transition-all active:scale-90 shadow-lg"
+            className="absolute top-6 right-6 p-3 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 text-white hover:bg-white/40 transition-all active:scale-90 shadow-lg"
           >
             <X size={20} />
           </button>
         </div>
-        {/* Header Action Area */}
+
+        {/* Hero Image Section */}
         <div className="relative h-72 sm:h-96 w-full">
           <img
             src={displayImage}
@@ -115,11 +119,11 @@ export function DetailsPopUp({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/20" />
 
-          {/* Top Buttons */}
-          <div className="absolute top-6 left-6 right-6 flex justify-between items-center">
+          {/* Favorite Button on Image */}
+          <div className="absolute top-6 left-6 z-[110]">
             <button
-              onClick={onFavoriteToggle}
-              className="p-3 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 text-white hover:bg-white/40 transition-all active:scale-90"
+              onClick={handleFavoriteClick}
+              className="p-3 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 text-white hover:bg-white/40 transition-all active:scale-90 shadow-lg"
             >
               <Heart
                 size={20}
@@ -136,7 +140,7 @@ export function DetailsPopUp({
           <div className="space-y-8">
             {/* Title & Location */}
             <div className="space-y-3">
-              <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-[0.9]">
+              <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-[0.9] uppercase">
                 {properties.PAGETITLE}
               </h2>
               <div className="flex items-center gap-2 text-slate-500 font-bold text-sm">
@@ -147,118 +151,83 @@ export function DetailsPopUp({
               </div>
             </div>
 
-            {/* Bento Grid Layout: Reduced size and tighter alignment */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 auto-rows-fr max-w-xl">
-              {/* 1. Opening Hours Card - Tall (Spans 2 rows) */}
+            {/* Bento Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 auto-rows-fr">
               <div className="sm:row-span-2 p-5 bg-slate-50 rounded-[28px] border border-slate-100 flex flex-col justify-center gap-4">
-                <div className="space-y-3">
-                  {/* Header: Icon + Schedule/Day Labels */}
+                <div className="space-y-3 text-center">
                   <div className="flex items-center justify-center gap-2.5">
-                    <div className="p-2 bg-white rounded-xl text-[#1572D3] shadow-sm shrink-0">
+                    <div className="p-2 bg-white rounded-xl text-[#1572D3] shadow-sm">
                       <Clock size={16} />
                     </div>
-                    <div className="flex flex-col">
-                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none">
-                        Schedule
-                      </p>
-                      <span className="text-[10px] font-black text-[#1572D3] uppercase tracking-widest mt-1 leading-none">
-                        {formatOpeningHours(properties.OPENING_HOURS).day}
-                      </span>
-                    </div>
+                    <span className="text-[10px] font-black text-[#1572D3] uppercase tracking-widest">
+                      {formatOpeningHours(properties.OPENING_HOURS).day}
+                    </span>
                   </div>
-
-                  {/* Time Section: Indented to align with text, not the icon */}
-                  <div className=" space-y-0.5 flex flex-col items-center text-center">
-                    <p className="text-[16px] font-black italic tracking-tighter text-slate-900 leading-none">
-                      {formatOpeningHours(properties.OPENING_HOURS).time}
-                    </p>
-                    <p className="text-[12px] pt-2 font-bold text-slate-400 tracking-tighter">
-                      Local SG Time
-                    </p>
-                  </div>
+                  <p className="text-[18px] font-black italic tracking-tighter text-slate-900 leading-tight">
+                    {formatOpeningHours(properties.OPENING_HOURS).time}
+                  </p>
                 </div>
               </div>
 
-              {/* 2. Official Link Card - Compact Standard Height */}
               <a
                 href={properties.EXTERNAL_LINK || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`p-4 rounded-[28px] border flex flex-col justify-center gap-2 transition-all group ${
+                className={`p-4 rounded-[28px] border flex items-center gap-3 transition-all group ${
                   properties.EXTERNAL_LINK
                     ? "bg-[#1572D3]/5 border-[#1572D3]/10 hover:bg-[#1572D3]/10"
                     : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
                 }`}
               >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-[#1572D3] rounded-xl text-white shadow-md shadow-[#1572D3]/20">
-                      <Globe size={20} />
-                    </div>
-                    <div className="flex flex-col ">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1572D3]/60">
-                        Official Site
-                      </p>
-                      <p className="text-[14px] font-black italic tracking-tighter text-[#1572D3]  leading-none">
-                        {properties.EXTERNAL_LINK ? "Visit Website" : "No Link"}
-                      </p>
-                    </div>
-                  </div>
-                  <ExternalLink
-                    size={15}
-                    className="text-[#1572D3] opacity-0 group-hover:opacity-100 transition-all"
-                  />
+                <div className="p-2 bg-[#1572D3] rounded-xl text-white shadow-md">
+                  <Globe size={20} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[#1572D3]/60">
+                    Official Site
+                  </p>
+                  <p className="text-sm font-black italic text-[#1572D3]">
+                    Visit Website
+                  </p>
                 </div>
               </a>
 
-              {/* 3. Rating Card - Compact Standard Height */}
-              <div className="p-4 bg-slate-50 rounded-[28px] border border-slate-100 flex flex-col justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-white rounded-xl text-yellow-500 shadow-sm">
-                    <Star size={16} className="fill-yellow-500" />
-                  </div>
-                  <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">
-                    User Rating
-                  </p>
+              <div className="p-4 bg-slate-50 rounded-[28px] border border-slate-100 flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl text-yellow-500 shadow-sm">
+                  <Star size={16} className="fill-yellow-500" />
                 </div>
-
-                <div className="space-y-0.5">
-                  <div className="flex items-baseline gap-1">
-                    <p className="text-[18px] font-black italic tracking-tighter text-slate-900 leading-none">
-                      {rating.toFixed(1)}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                      / 5.0
-                    </p>
-                  </div>
-                  <p className="text-[12px] font-bold text-slate-400 tracking-tighter">
-                    Reviews
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Rating
+                  </p>
+                  <p className="text-sm font-black italic text-slate-900">
+                    {rating.toFixed(1)} / 5.0
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Description Section */}
+            {/* Overview */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-1 bg-[#1572D3] rounded-full" />
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                   Overview
                 </p>
               </div>
-              <p className="text-slate-600 leading-relaxed font-medium text-base">
+              <p className="text-slate-600 leading-relaxed font-medium">
                 {properties.OVERVIEW ||
-                  "Experience one of Singapore's most iconic destinations. No description available."}
+                  "Experience one of Singapore's most iconic destinations."}
               </p>
             </div>
 
-            {/* Main Action: View Map */}
+            {/* Back to Map Button */}
             <Link
               href={`/map?selectedId=${data.properties.OBJECTID_1}`}
               className="flex items-center justify-center gap-3 w-full py-5 bg-[#1572D3] !text-white font-black tracking-widest text-xs rounded-[24px] shadow-2xl shadow-[#1572D3]/40 hover:bg-[#125ba8] transition-all active:scale-[0.98]"
             >
               <Map size={18} />
-              View on Map
+              VIEW ON MAP
             </Link>
           </div>
         </div>
