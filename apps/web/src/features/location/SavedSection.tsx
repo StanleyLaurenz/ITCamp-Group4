@@ -93,7 +93,7 @@ export function SavedSection({
           </h2>
           <Link
             href="/saved"
-            className="flex items-center gap-2 text-sm font-bold text-[#1572D3] hover:text-[#125ba8] transition-colors bg-[#1572D3]/5 px-4 py-2 rounded-full"
+            className="flex items-center gap-2 text-sm font-bold text-[#1572D3] hover:text-[#125ba8] transition-colors bg-[#1572D3]/5 px-4 py-2 rounded-full "
           >
             View all ({savedLocations.length}) <span>→</span>
           </Link>

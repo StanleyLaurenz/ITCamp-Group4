@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from 'react'
+import type { PropsWithChildren } from "react";
 
 export function AppLayout({ children }: PropsWithChildren) {
   return (
@@ -7,5 +7,5 @@ export function AppLayout({ children }: PropsWithChildren) {
         {children}
       </div>
     </div>
-  )
+  );
 }

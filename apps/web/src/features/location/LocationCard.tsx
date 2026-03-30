@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { MapPin, Heart, Star, Map, Info } from "react-feather";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter, usePathname } from "next/navigation";
 import { DetailsPopUp } from "./DetailsPopUp";
 import Link from "next/link"; // Import Link
 
@@ -29,6 +31,7 @@ export function LocationCard({
   item,
 }: LocationCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+
   const backgroundUrl =
     imageUrl ||
     "https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600";
@@ -41,6 +44,25 @@ export function LocationCard({
     Architecture: "bg-blue-500/10 text-blue-300 border-blue-500/20",
     Lifestyle: "bg-pink-500/10 text-pink-300 border-pink-500/20",
     Landmark: "bg-slate-500/10 text-slate-300 border-slate-500/20",
+  };
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user } = useAuth(); // Get user status
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      // If not logged in, redirect to login with a return path
+      const returnUrl = encodeURIComponent(pathname);
+      router.push(`/login?returnTo=${returnUrl}`);
+      return;
+    }
+
+    // If logged in, proceed with the toggle
+    onFavoriteToggle();
   };
 
   return (
@@ -57,11 +79,7 @@ export function LocationCard({
 
       {/* 3. Favorite Icon */}
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onFavoriteToggle();
-        }}
+        onClick={handleFavoriteClick}
         className="absolute top-5 right-5 z-20 p-2.5 bg-black/20 backdrop-blur-md rounded-full border border-white/20 transition-all hover:bg-black/40 active:scale-90"
       >
         <Heart
@@ -127,7 +145,7 @@ export function LocationCard({
         <Link
           href={`/map?selectedId=${id}`}
           onClick={(e) => e.stopPropagation()} // Prevent card details from opening
-          className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-[#1572D3] !text-white rounded-2xl text-xs font-black tracking-widest shadow-lg hover:bg-[#125ba8] transition-all active:scale-[0.98] mt-2"
+          className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-[#1572D3] !text-white rounded-2xl text-xs font-black tracking-widest shadow-lg hover:bg-[#125ba8] transition-all active:scale-[0.98] mt-2 uppercase"
         >
           <Map size={14} className="text-white" />
           View Map
