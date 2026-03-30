@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { LogOut, Heart } from "react-feather";
+import { LogOut, Heart, ChevronRight } from "react-feather";
 import { getAttractions } from "@/lib/api";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getCategories } from "@/utils/categorize";
@@ -45,14 +45,14 @@ export default function Navbar() {
   const email = user?.email ?? "";
   const attractionLookup = useMemo(
     () => new Map(attractions.map((item) => [item.id, item])),
-    [attractions],
+    [attractions]
   );
   const recentLikedItems = useMemo(
     () =>
       savedOrder
         .map((id) => attractionLookup.get(id))
         .filter((item): item is RecentLikedItem => Boolean(item)),
-    [attractionLookup, savedOrder],
+    [attractionLookup, savedOrder]
   );
 
   const navLinkClass = (path: string) =>
@@ -195,70 +195,76 @@ export default function Navbar() {
                   </button>
 
                   {isHeartMenuOpen && (
-                    <div className="absolute right-0 top-full mt-3 w-[380px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                      <div className="border-b border-slate-200 px-6 py-4">
-                        <p className="text-[13px] font-black tracking-tight text-slate-900 underline underline-offset-4">
-                          Recently liked
-                        </p>
-                      </div>
+                    <>
+                      <div className="absolute right-3.5 top-[calc(100%+4px)] z-[10001] h-3 w-3 rotate-45 border-l border-t border-slate-200 bg-white" />
+                      <div className="absolute right-0 top-[calc(100%+12px)] z-[10000] w-[400px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in fade-in zoom-in-95 duration-200">
+                        <div className="bg-slate-50/50 border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+                          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                            Recently Liked
+                          </h3>
+                          <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+                            {savedOrder.length}
+                          </span>
+                        </div>
 
-                      {isHeartLoading ? (
-                        <div className="px-6 py-8 text-sm text-slate-500">
-                          Loading liked items...
-                        </div>
-                      ) : heartError ? (
-                        <div className="px-6 py-8 text-sm font-medium text-red-500">
-                          {heartError}
-                        </div>
-                      ) : recentLikedItems.length === 0 ? (
-                        <div className="px-6 py-8 text-sm text-slate-500">
-                          No liked locations yet.
-                        </div>
-                      ) : (
-                        <div className="max-h-[360px] overflow-y-auto bg-slate-50/40 px-3 py-3">
-                          {recentLikedItems.map((item, index) => (
-                            <div
-                              key={item.id}
-                              className={`mb-3 overflow-hidden rounded-[24px] border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md ${
-                                index === recentLikedItems.length - 1 ? "mb-0" : ""
-                              }`}
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className="min-w-0 flex-1 space-y-3">
-                                  <p className="line-clamp-2 text-lg font-extrabold tracking-tight text-slate-900">
+                        <div className="max-h-[380px] overflow-y-auto p-3 space-y-2">
+                          {isHeartLoading ? (
+                            <div className="p-8 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+                              Loading...
+                            </div>
+                          ) : recentLikedItems.length === 0 ? (
+                            <div className="p-8 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+                              No favorites yet
+                            </div>
+                          ) : (
+                            recentLikedItems.map((item) => (
+                              <Link
+                                key={item.id}
+                                href={`/location?selectedId=${item.id}`}
+                                className="group flex items-center gap-3 p-2 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+                              >
+                                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                                  {item.imageUrl && (
+                                    <img
+                                      src={item.imageUrl}
+                                      className="h-full w-full object-cover group-hover:scale-110 transition-transform"
+                                    />
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-[16px] font-black italic tracking-tighter text-slate-900">
                                     {item.title}
                                   </p>
-                                  <div className="flex flex-wrap gap-2">
-                                    {item.categories.slice(0, 2).map((category) => (
+                                  <div className="flex gap-1 mt-1">
+                                    {item.categories.slice(0, 1).map((cat) => (
                                       <span
-                                        key={`${item.id}-${category}`}
-                                        className={`px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase border backdrop-blur-md transition-colors ${
-                                          categoryStyles[category] || categoryStyles.Landmark
+                                        key={cat}
+                                        className={`text-[10px] font-black px-2 py-0.5 rounded-md border uppercase ${
+                                          categoryStyles[cat] ||
+                                          categoryStyles.Landmark
                                         }`}
                                       >
-                                        {category}
+                                        {cat}
                                       </span>
                                     ))}
                                   </div>
                                 </div>
-
-                                {item.imageUrl ? (
-                                  <img
-                                    src={item.imageUrl}
-                                    alt={item.title}
-                                    className="h-24 w-28 shrink-0 rounded-[20px] object-cover"
-                                  />
-                                ) : (
-                                  <div className="flex h-24 w-28 shrink-0 items-center justify-center rounded-[20px] bg-slate-100 text-xs font-semibold text-slate-400">
-                                    No image
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                                <ChevronRight
+                                  size={14}
+                                  className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all"
+                                />
+                              </Link>
+                            ))
+                          )}
                         </div>
-                      )}
-                    </div>
+                        <Link
+                          href="/saved"
+                          className="block w-full py-4 text-center text-[13px] font-black tracking-[0.2em] bg-slate-50 text-slate-400 hover:text-slate-900 border-t border-slate-100"
+                        >
+                          View All Saved
+                        </Link>
+                      </div>
+                    </>
                   )}
                 </div>
 
