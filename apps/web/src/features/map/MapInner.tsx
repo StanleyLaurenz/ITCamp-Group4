@@ -6,7 +6,19 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
 import type { Landmark } from "./types";
-import { Popup, useMap } from "react-leaflet";
+import { Popup, useMap, Polyline, CircleMarker } from "react-leaflet";
+
+const MRT_COLORS: Record<string, string> = {
+  "NORTH-SOUTH LINE": "#D42E12",
+  "EAST-WEST LINE": "#009543",
+  "NORTH-EAST LINE": "#8F4199",
+  "CIRCLE LINE": "#FFA400",
+  "DOWNTOWN LINE": "#005BA4",
+  "THOMSON-EAST COAST LINE": "#9D5B25",
+  "BUKIT PANJANG LRT": "#748477",
+  "SENGKANG LRT": "#748477",
+  "PUNGGOL LRT": "#748477",
+};
 
 // Fix broken marker icons in Leaflet for Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -17,6 +29,59 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+const createMRTIcon = (stationLines: string[], currentZoom: number) => {
+  const colors = stationLines.map((line) => MRT_COLORS[line] || "#748477");
+
+  // Dynamic Sizing based on Zoom
+  // Zoom 12 (Default) = 24px, Zoom 10 (Out) = 12px, Zoom 15 (In) = 32px
+  const baseSize = currentZoom < 12 ? 12 : currentZoom > 14 ? 32 : 24;
+  const innerSize = baseSize * 0.6;
+  const iconOffset = baseSize / 2;
+
+  const backgroundStyle =
+    colors.length > 1
+      ? `background: conic-gradient(${colors
+          .map(
+            (c, i) =>
+              `${c} ${i * (360 / colors.length)}deg ${
+                (i + 1) * (360 / colors.length)
+              }deg`
+          )
+          .join(", ")});`
+      : `background: ${colors[0]};`;
+
+  return L.divIcon({
+    className: "custom-mrt-icon",
+    html: `
+      <div class="relative flex items-center justify-center transition-all duration-300" 
+           style="width: ${baseSize}px; height: ${baseSize}px;">
+        <div class="absolute w-full h-full rounded-[4px] rotate-45 shadow-sm border border-white/30" 
+             style="${backgroundStyle}">
+        </div>
+        
+        ${
+          currentZoom > 11
+            ? `
+          <div class="absolute bg-white rounded-full flex items-center justify-center z-10 shadow-inner"
+               style="width: ${innerSize}px; height: ${innerSize}px;">
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-slate-800">
+             <path d="M7 15h10" />
+             <path d="M12 15V5" />
+             <path d="M7 11h10" />
+             <rect x="3" y="5" width="18" height="15" rx="2" />
+             <path d="m8 21-2-2" />
+             <path d="m16 21 2-2" />
+           </svg>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    `,
+    iconSize: [baseSize, baseSize],
+    iconAnchor: [iconOffset, iconOffset],
+  });
+};
 /**
  * Creates a custom SVG Pin marker.
  * Blue (#1572D3) for standard landmarks, Red (#EF4444) for saved ones.
@@ -56,6 +121,19 @@ const createCustomMarker = (isSelected: boolean, isSaved: boolean) => {
   });
 };
 
+function ZoomHandler({
+  onZoomChange,
+}: {
+  onZoomChange: (zoom: number) => void;
+}) {
+  const map = useMapEvents({
+    zoomend: () => {
+      onZoomChange(map.getZoom());
+    },
+  });
+  return null;
+}
+
 function MapClickHandler({ onClose }: { onClose: () => void }) {
   useMapEvents({ click: onClose });
   return null;
@@ -71,6 +149,9 @@ interface MapInnerProps {
   showRain: boolean;
   showSavedOnly: boolean;
   initialSelectedId: number | null;
+  showMRT: boolean;
+  mrtData: { stations: any[]; lines: any[] } | null;
+  activeLines: string[]; // ADD THIS
 }
 
 interface MapControllerProps {
@@ -114,17 +195,17 @@ export default function MapInner({
   initialSelectedId,
   isLoggedIn,
   showLandmarks,
-  showTaxi: _showTaxi,
-  showRain: _showRain,
   showSavedOnly,
+  showMRT,
+  mrtData,
+  activeLines,
 }: MapInnerProps) {
   const [selectedId, setSelectedId] = useState<number | null>(
     initialSelectedId
   );
+  const [currentZoom, setCurrentZoom] = useState(12); // Default zoom level
 
-  const handleClose = () => {
-    setSelectedId(null);
-  };
+  const handleClose = () => setSelectedId(null);
 
   return (
     <div className="relative w-full h-full">
@@ -136,19 +217,85 @@ export default function MapInner({
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
+        {/* Track zoom changes */}
+        <ZoomHandler onZoomChange={setCurrentZoom} />
+
         <MapController
-          initialSelectedId={initialSelectedId}
           landmarks={landmarks}
+          initialSelectedId={initialSelectedId}
           setSelectedId={setSelectedId}
         />
-
         <MapClickHandler onClose={() => setSelectedId(null)} />
 
+        {/* --- MRT LAYER --- */}
+        {showMRT &&
+          Array.isArray(mrtData) &&
+          mrtData
+            .filter((st) =>
+              st.lines.some((l: string) => activeLines.includes(l))
+            )
+            .map((st, i) => (
+              <Marker
+                key={`mrt-${st.name}-${i}`} // Use station name for a more unique key
+                position={st.position} // Uses the 'position' key [lat, lng] from your backend
+                icon={createMRTIcon(st.lines, currentZoom)} // Uses the 'lines' key from your backend
+              >
+                <Popup className="mrt-popup-custom">
+                  <div className="p-3 min-w-[180px] font-sans bg-white/95 backdrop-blur-sm rounded-xl">
+                    {/* Header with MRT Icon */}
+                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 text-white shadow-lg">
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="4" y="3" width="16" height="15" rx="2" />
+                          <path d="M4 11h16M8 18l-2 3M16 18l2 3" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-base font-black uppercase text-slate-900 leading-tight tracking-tight">
+                          {st.name}
+                        </h4>
+                      </div>
+                    </div>
+
+                    {/* Lines Section */}
+                    <div className="space-y-2">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                        Service Lines
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {st.lines.map((line: string) => (
+                          <div
+                            key={line}
+                            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[9px] font-black text-white shadow-sm transition-transform hover:scale-105"
+                            style={{
+                              backgroundColor: MRT_COLORS[line] || "#748477",
+                            }}
+                          >
+                            <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                            {line.replace("-", " ").replace(" LINE", "")}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+
+        {/* --- LANDMARKS LAYER --- */}
         {landmarks.map((lm) => {
           const isSaved = savedIds.includes(lm.id);
           const isSelected = selectedId === lm.id;
           const shouldShow = showLandmarks || (showSavedOnly && isSaved);
-
           if (!shouldShow) return null;
 
           return (
@@ -156,23 +303,8 @@ export default function MapInner({
               key={lm.id}
               position={[lm.lat, lm.lng]}
               icon={createCustomMarker(isSelected, isSaved)}
-              eventHandlers={{
-                click: () => {
-                  setSelectedId(lm.id);
-                },
-                add: (e) => {
-                  if (lm.id === initialSelectedId) {
-                    e.target.openPopup();
-                  }
-                },
-                popupclose: () => {
-                  if (selectedId === lm.id) {
-                    setSelectedId(null);
-                  }
-                },
-              }}
+              eventHandlers={{ click: () => setSelectedId(lm.id) }}
             >
-              {/* Anchor the card to the marker */}
               {isSelected && (
                 <Popup
                   className="custom-landmark-popup"
