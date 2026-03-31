@@ -12,6 +12,7 @@ import { BrowseSection } from "./BrowseSection";
 import { DetailsPopUp } from "./DetailsPopUp";
 import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
+import { calculateDistance } from "@/utils/distance";
 
 export function LocationPage() {
   const searchParams = useSearchParams();
@@ -37,11 +38,71 @@ export function LocationPage() {
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       try {
-        const data = await getAttractions();
-        setAttractions(data || []);
+        const baseUrl =
+          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+
+        // 1. Fetch Attractions first (Critical)
+        const attractionsData = await getAttractions();
+
+        // 2. Try to fetch MRT (Optional)
+        let mrtStations = [];
+        try {
+          const mrtRes = await fetch(`${baseUrl}/api/mrt`).then((res) => {
+            if (!res.ok) throw new Error("MRT API Error");
+            return res.json();
+          });
+          // Check if your API returns { stations: [] } or just []
+          mrtStations = Array.isArray(mrtRes) ? mrtRes : mrtRes.stations || [];
+        } catch (mrtErr) {
+          console.warn(
+            "MRT data could not be fetched, skipping distances.",
+            mrtErr
+          );
+        }
+
+        // 3. Map through attractions
+        const enrichedData = (attractionsData || []).map((item: any) => {
+          const lat = item.geometry?.coordinates?.[1];
+          const lng = item.geometry?.coordinates?.[0];
+
+          let nearestStr = "";
+
+          // Only calculate if coordinates and MRT data both exist
+          if (lat && lng && mrtStations.length > 0) {
+            let nearest = { name: "Unknown", distance: Infinity };
+
+            mrtStations.forEach((mrt: any) => {
+              if (mrt.position) {
+                const d = calculateDistance(
+                  lat,
+                  lng,
+                  mrt.position[0],
+                  mrt.position[1]
+                );
+                if (d < nearest.distance) {
+                  nearest = { name: mrt.name, distance: d };
+                }
+              }
+            });
+
+            if (nearest.name !== "Unknown") {
+              nearestStr = `${nearest.name} (${nearest.distance.toFixed(
+                2
+              )} km)`;
+            }
+          }
+
+          return {
+            ...item,
+            nearestMRT: nearestStr,
+          };
+        });
+
+        setAttractions(enrichedData);
       } catch (error) {
-        console.error("Failed to fetch attractions:", error);
+        console.error("Critical failure loading attractions:", error);
       } finally {
         setLoading(false);
       }

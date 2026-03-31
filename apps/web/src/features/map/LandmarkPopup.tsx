@@ -65,11 +65,35 @@ export default function LandmarkPopup({
 
         {/* Content Section */}
         <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white space-y-4">
-          <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-lg w-fit px-3 py-1.5 rounded-xl border border-white/10">
-            <Star size={12} className="text-yellow-400 fill-yellow-400" />
-            <span className="font-bold text-[10px]">
-              {landmark.rating.toFixed(1)}
-            </span>
+          <div className="flex items-center gap-2">
+            {/* Rating Badge */}
+            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
+              <Star size={12} className="text-yellow-400 fill-yellow-400" />
+              <span className="font-bold text-[10px]">
+                {landmark.rating.toFixed(1)}
+              </span>
+            </div>
+
+            {/* MRT Badge (Next to Rating) */}
+            {landmark.nearestMRT && (
+              <div className="flex items-center gap-1.5 bg-[#1572D3]/20 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#1572D3]/30">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#1572D3"
+                  strokeWidth="3"
+                >
+                  <rect x="4" y="3" width="16" height="15" rx="2" />
+                  <path d="M4 11h16M8 18l-2 3M16 18l2 3" />
+                </svg>
+                <span className="text-[10px] font-black uppercase text-white tracking-tight">
+                  {landmark.nearestMRT.split(" (")[0]}{" "}
+                  {/* Short name to save space */}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">

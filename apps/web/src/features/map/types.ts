@@ -1,11 +1,12 @@
 export interface Landmark {
-  id: number;           // OBJECTID_1
-  title: string;        // PAGETITLE
-  address: string;      // ADDRESS (fallback "Singapore")
-  overview: string;     // OVERVIEW
+  id: number;
+  title: string;
+  address: string;
+  overview: string;
   imageUrl: string | null;
-  lat: number;          // geometry.coordinates[1]
-  lng: number;          // geometry.coordinates[0]
-  categories: string[]; // via getCategories()
-  rating: number;       // via getStaticRating()
+  lat: number;
+  lng: number;
+  categories: string[];
+  rating: number;
+  nearestMRT?: string; // Add this line
 }
