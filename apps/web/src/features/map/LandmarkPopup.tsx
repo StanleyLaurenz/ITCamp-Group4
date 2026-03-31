@@ -70,7 +70,7 @@ export default function LandmarkPopup({
             <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
               <Star size={12} className="text-yellow-400 fill-yellow-400" />
               <span className="font-bold text-[10px]">
-                {landmark.rating.toFixed(1)}
+                {landmark.rating?.toFixed(1)}
               </span>
             </div>
 

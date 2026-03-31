@@ -40,69 +40,23 @@ export function LocationPage() {
     async function fetchData() {
       setLoading(true);
       try {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
-
-        // 1. Fetch Attractions first (Critical)
         const attractionsData = await getAttractions();
 
-        // 2. Try to fetch MRT (Optional)
-        let mrtStations = [];
-        try {
-          const mrtRes = await fetch(`${baseUrl}/api/mrt`).then((res) => {
-            if (!res.ok) throw new Error("MRT API Error");
-            return res.json();
-          });
-          // Check if your API returns { stations: [] } or just []
-          mrtStations = Array.isArray(mrtRes) ? mrtRes : mrtRes.stations || [];
-        } catch (mrtErr) {
-          console.warn(
-            "MRT data could not be fetched, skipping distances.",
-            mrtErr
-          );
-        }
-
-        // 3. Map through attractions
-        const enrichedData = (attractionsData || []).map((item: any) => {
-          const lat = item.geometry?.coordinates?.[1];
-          const lng = item.geometry?.coordinates?.[0];
-
-          let nearestStr = "";
-
-          // Only calculate if coordinates and MRT data both exist
-          if (lat && lng && mrtStations.length > 0) {
-            let nearest = { name: "Unknown", distance: Infinity };
-
-            mrtStations.forEach((mrt: any) => {
-              if (mrt.position) {
-                const d = calculateDistance(
-                  lat,
-                  lng,
-                  mrt.position[0],
-                  mrt.position[1]
-                );
-                if (d < nearest.distance) {
-                  nearest = { name: mrt.name, distance: d };
-                }
-              }
-            });
-
-            if (nearest.name !== "Unknown") {
-              nearestStr = `${nearest.name} (${nearest.distance.toFixed(
-                2
-              )} km)`;
-            }
-          }
-
+        // FLATTEN EVERYTHING HERE
+        const unifiedData = (attractionsData || []).map((item: any) => {
+          const id = Number(item.properties?.OBJECTID_1);
           return {
             ...item,
-            nearestMRT: nearestStr,
+            id: id, // Top-level ID
+            rating: getStaticRating(id), // Top-level Rating (Calculated once)
+            categories: getCategories(item), // Top-level Categories
+            // nearestMRT is already attached by backend
           };
         });
 
-        setAttractions(enrichedData);
+        setAttractions(unifiedData);
       } catch (error) {
-        console.error("Critical failure loading attractions:", error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -142,7 +96,7 @@ export function LocationPage() {
       selectedCategories.some((cat) => itemCats.includes(cat));
 
     // 3. Rating Match
-    const itemRating = getStaticRating(Number(properties["OBJECTID_1"]));
+    const itemRating = getStaticRating(Number(item.properties.OBJECTID_1));
     const ratingMatch = itemRating >= minRating;
 
     return titleMatch && categoryMatch && ratingMatch;

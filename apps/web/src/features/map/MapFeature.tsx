@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { MapPin, CloudRain, Heart } from "react-feather";
-import { getAttractions } from "@/lib/api";
+import { getAttractions, getMRTStations } from "@/lib/api";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
@@ -56,75 +56,53 @@ export function MapFeature() {
 
   // Inside MapFeature.tsx -> fetchAllData function
   useEffect(() => {
-    async function fetchAllData() {
+    async function fetchAllMapData() {
       setLoading(true);
       try {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
-
-        const [attractionsData, mrtResponse] = await Promise.all([
+        const [attractionsData, mrtDataResponse] = await Promise.all([
           getAttractions(),
-          fetch(`${baseUrl}/api/mrt`)
-            .then((res) => (res.ok ? res.json() : null))
-            .catch(() => null),
+          getMRTStations(),
         ]);
 
-        const stations = Array.isArray(mrtResponse)
-          ? mrtResponse
-          : mrtResponse?.stations || [];
+        console.log(attractionsData);
 
-        setMrtData(mrtResponse);
+        // Flatten the data so LandmarkPopup gets exactly what it expects
+        // Inside MapFeature.tsx -> fetchAllMapData function
+        const flattenedLandmarks = (attractionsData as any[]).map((item) => {
+          // 1. Get the numeric ID (this is the seed for your rating)
+          const id = Number(item.properties?.OBJECTID_1);
+          const coords = item.geometry?.coordinates || [0, 0];
 
-        const enriched: Landmark[] = (attractionsData as any[])
-          .filter((item) => item.geometry?.coordinates?.length >= 2)
-          .map((item) => {
-            const id = Number(item.properties.OBJECTID_1);
-            const lat = item.geometry.coordinates[1];
-            const lng = item.geometry.coordinates[0];
+          return {
+            ...item,
+            id: id,
+            title: item.properties?.PAGETITLE || "Unknown",
+            address: item.properties?.ADDRESS || "Singapore",
+            lat: coords[1],
+            lng: coords[0],
+            imageUrl: item.imageUrl,
 
-            let nearest = { name: "Unknown", distance: Infinity };
+            // 2. GENERATE THE RATING (Same as Location Card)
+            rating: getStaticRating(id),
 
-            if (stations.length > 0) {
-              stations.forEach((st: any) => {
-                // Ensure we are accessing the position correctly [lat, lng]
-                const stPos = st.position || [st.lat, st.lng];
-                if (stPos) {
-                  const d = calculateDistance(lat, lng, stPos[0], stPos[1]);
-                  if (d < nearest.distance) {
-                    nearest = { name: st.name || st.station_name, distance: d };
-                  }
-                }
-              });
-            }
+            // 3. GENERATE CATEGORIES (Same as Location Card)
+            categories: getCategories(item),
 
-            return {
-              id,
-              title: item.properties.PAGETITLE,
-              address: item.properties.ADDRESS || "Singapore",
-              overview: item.properties.OVERVIEW || "",
-              imageUrl: item.imageUrl ?? null,
-              lat,
-              lng,
-              categories: getCategories(item),
-              rating: getStaticRating(id),
-              // ATTACH THE PROPERTY
-              nearestMRT:
-                nearest.name !== "Unknown"
-                  ? `${nearest.name} (${nearest.distance.toFixed(2)} km)`
-                  : "",
-            };
-          });
+            nearestMRT: item.nearestMRT || "",
+          };
+        });
 
-        setLandmarks(enriched);
+        setLandmarks(flattenedLandmarks);
+
+        setLandmarks(flattenedLandmarks);
+        setMrtData(mrtDataResponse);
       } catch (err) {
-        console.error("Critical Load Error:", err);
         setError("Failed to load map data.");
       } finally {
         setLoading(false);
       }
     }
-
-    fetchAllData();
+    fetchAllMapData();
   }, []);
 
   const toggleMRTLine = (lineName: string) => {

@@ -96,28 +96,28 @@ export function LocationCard({
       <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white space-y-3">
         {/* 1. MRT Pre-header (Top of Title) */}
         {item.nearestMRT && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border transition-all active:scale-95 group/mrt w-fit bg-[#1572D3]/20 border-[#1572D3]/30">
-            {/* MRT Icon (SVG) */}
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="flex-shrink-0 text-[#1572D3]"
-            >
-              <rect x="4" y="3" width="16" height="15" rx="2" />
-              <path d="M4 11h16M8 18l-2 3M16 18l2 3" />
-            </svg>
-
-            <span className="text-[10px] font-black uppercase text-white tracking-[0.1em] drop-shadow-md">
-              {item.nearestMRT}
-            </span>
-          </div>
-        )}
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border transition-all active:scale-95 group/mrt w-fit bg-[#1572D3]/20 border-[#1572D3]/30">
+      {/* MRT Icon (SVG) */}
+      <svg 
+        width="14" 
+        height="14" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className="flex-shrink-0 text-[#1572D3]"
+      >
+        <rect x="4" y="3" width="16" height="15" rx="2" />
+        <path d="M4 11h16M8 18l-2 3M16 18l2 3" />
+      </svg>
+      
+      <span className="text-[10px] font-black uppercase text-white tracking-[0.1em] drop-shadow-md">
+        {item.nearestMRT}
+      </span>
+    </div>
+  )}
 
         {/* 2. Title & Address Row */}
         <div className="space-y-1">

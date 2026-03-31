@@ -12,6 +12,7 @@ import { getCategories } from "@/utils/categorize";
 import Navbar from "@/components/Navbar"; // Ensure this path is correct
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { calculateDistance } from "@/utils/distance";
+import { getStaticRating } from "@/utils/generateRating";
 
 export default function SavedPage() {
   const { user, loading: authLoading } = useAuth();
@@ -33,67 +34,34 @@ export default function SavedPage() {
     }
   }, [isLoggedIn, authLoading, router]);
 
+  // Inside SavedPage() component
   useEffect(() => {
-    async function loadEnrichedData() {
+    async function loadData() {
       setIsLoading(true);
       try {
-        const baseUrl =
-          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+        const data = await getAttractions();
 
-        // 1. Fetch both Attractions and MRT Data
-        const [attractionsData, mrtResponse] = await Promise.all([
-          getAttractions(),
-          fetch(`${baseUrl}/api/mrt`)
-            .then((res) => (res.ok ? res.json() : null))
-            .catch(() => null),
-        ]);
-
-        const stations = Array.isArray(mrtResponse)
-          ? mrtResponse
-          : mrtResponse?.stations || [];
-
-        // 2. Enrich the data with nearest MRT
-        const enriched = (attractionsData || []).map((item: any) => {
-          const lat = item.geometry?.coordinates?.[1];
-          const lng = item.geometry?.coordinates?.[0];
-
-          let nearestStr = "";
-
-          if (lat && lng && stations.length > 0) {
-            let nearest = { name: "Unknown", distance: Infinity };
-
-            stations.forEach((st: any) => {
-              const stPos = st.position || [st.lat, st.lng];
-              if (stPos) {
-                const d = calculateDistance(lat, lng, stPos[0], stPos[1]);
-                if (d < nearest.distance) {
-                  nearest = { name: st.name, distance: d };
-                }
-              }
-            });
-
-            if (nearest.name !== "Unknown") {
-              nearestStr = `${nearest.name} (${nearest.distance.toFixed(
-                2
-              )} km)`;
-            }
-          }
-
+        // Flatten the data immediately so it matches your other pages
+        const flattened = (data || []).map((item: any) => {
+          const id = Number(item.properties?.OBJECTID_1);
           return {
             ...item,
-            nearestMRT: nearestStr, // Add the calculated MRT string here
+            id: id,
+            // Generate the static rating here
+            rating: getStaticRating(id),
+            // Generate categories here
+            categories: getCategories(item),
           };
         });
 
-        setAttractions(enriched);
+        setAttractions(flattened);
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error("Failed to fetch attractions:", error);
       } finally {
         setIsLoading(false);
       }
     }
-
-    loadEnrichedData();
+    loadData();
   }, []);
 
   const savedAttractions = attractions.filter((item) =>
@@ -174,7 +142,7 @@ export default function SavedPage() {
                   id={item.properties.OBJECTID_1}
                   title={item.properties.PAGETITLE}
                   mrtLocation={item.properties.ADDRESS || "Singapore"}
-                  rating={4.5}
+                  rating={item.rating}
                   categories={getCategories(item)}
                   imageUrl={item.imageUrl}
                   isFavorite={true}
