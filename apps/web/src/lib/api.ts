@@ -19,11 +19,21 @@ export async function getHealth(): Promise<HealthResponse> {
 }
 
 export async function getAttractions() {
-  const response = await fetch(`${getApiBaseUrl()}/api/attractions`); //
+  const response = await fetch(`${getApiBaseUrl()}/api/attractions`);
 
   if (!response.ok) {
     throw new Error(`Failed to load attractions: ${response.status}`);
   }
 
+  return response.json();
+}
+
+export async function getTaxis() {
+  const response = await fetch(`${getApiBaseUrl()}/api/taxi`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to get taxi coordinates: ${response.status}`);
+  }
+  
   return response.json();
 }

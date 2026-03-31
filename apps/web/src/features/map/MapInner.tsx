@@ -5,7 +5,7 @@ import L from "leaflet";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
-import type { Landmark } from "./types";
+import type { Landmark, Taxi } from "./types";
 import { Popup, useMap } from "react-leaflet";
 
 // Fix broken marker icons in Leaflet for Next.js

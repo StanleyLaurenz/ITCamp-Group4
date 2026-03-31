@@ -9,3 +9,8 @@ export interface Landmark {
   categories: string[]; // via getCategories()
   rating: number;       // via getStaticRating()
 }
+
+export interface Taxi {
+  lat: number;
+  lang: number;
+}
