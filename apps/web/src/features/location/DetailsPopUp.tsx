@@ -38,6 +38,8 @@ export function DetailsPopUp({
   const pathname = usePathname();
   const { user } = useAuth();
 
+  const nearestMRT = data.nearestMRT;
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -138,6 +140,33 @@ export function DetailsPopUp({
         {/* Content Section */}
         <div className="p-8 sm:p-10 -mt-16 relative bg-white rounded-t-[48px]">
           <div className="space-y-8">
+            {nearestMRT && (
+              <div className="animate-in slide-in-from-bottom-2 duration-500">
+                <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-[#1572D3]/5 border border-[#1572D3]/10 rounded-2xl shadow-sm">
+                  <div className="p-1.5 bg-[#1572D3] rounded-lg text-white shadow-md shadow-[#1572D3]/20">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                    >
+                      <rect x="4" y="3" width="16" height="15" rx="2" />
+                      <path d="M4 11h16M8 18l-2 3M16 18l2 3" />
+                    </svg>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#1572D3]/60 leading-none mb-1">
+                      Nearest Transit
+                    </span>
+                    <span className="text-sm font-black italic text-[#1572D3] leading-none">
+                      {nearestMRT}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Title & Location */}
             <div className="space-y-3">
               <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-[0.9]">
