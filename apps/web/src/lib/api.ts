@@ -11,8 +11,13 @@ function getApiBaseUrl(): string {
 }
 
 export async function getMRTStations() {
-  const response = await fetch(`${BASE_URL}/api/mrt`);
-  if (!response.ok) return []; // Fallback so the map doesn't crash
+  // Use the same helper as getAttractions to ensure the URL is identical
+  const response = await fetch(`${getApiBaseUrl()}/api/mrt`);
+
+  if (!response.ok) {
+    console.error("MRT Fetch failed with status:", response.status);
+    return [];
+  }
   return response.json();
 }
 
@@ -46,4 +51,3 @@ export async function getWeather() {
 
   return response.json();
 }
-
