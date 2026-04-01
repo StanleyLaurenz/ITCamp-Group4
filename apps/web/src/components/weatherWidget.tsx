@@ -9,7 +9,6 @@ import {
   Droplet,
   Wind,
   Navigation,
-  Sunrise,
 } from "react-feather";
 
 interface WeatherData {
@@ -31,6 +30,7 @@ export default function WeatherWidget() {
   const fetchWeather = async () => {
     setLoading(true);
     try {
+      // Fetching from internal Next.js route
       const res = await fetch("/weather");
       const data = await res.json();
       setWeather(data);
@@ -45,151 +45,129 @@ export default function WeatherWidget() {
     fetchWeather();
   }, []);
 
-  const today = new Date().toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-  });
-
   if (!isExpanded) {
     return (
       <button
         onClick={() => setIsExpanded(true)}
-        className="absolute top-6 right-6 z-[999] p-4 bg-[#1572D3] hover:bg-[#1261b5] text-white rounded-2xl shadow-[0_10px_25px_rgba(21,114,211,0.4)] transition-all duration-300 hover:scale-105 active:scale-95 border border-white/20"
+        className="absolute top-6 right-6 z-[999] p-3 bg-[#1572D3]/80 hover:bg-[#1572D3] text-white rounded-xl shadow-lg backdrop-blur-md border border-white/20 transition-all duration-300 hover:scale-105 active:scale-95"
       >
-        <Cloud size={30} />
+        <Cloud size={24} />
       </button>
     );
   }
 
+  // 2. COMPACT SEMI-TRANSPARENT POP-UP
   return (
-    <div className="absolute top-6 right-6 z-[999] w-[340px] bg-white text-slate-800 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden animate-in fade-in zoom-in duration-300">
-      {/* Premium Header Container */}
-      <div className="bg-[#1572D3] p-8 text-white relative overflow-hidden">
-        {/* Background Decorative Circle */}
-        <div className="absolute -top-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-
-        <div className="flex justify-between items-start relative z-10 mb-8">
-          <div className="flex items-center gap-2 bg-black/10 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/10">
+    <div className="absolute top-6 right-6 z-[999] w-[300px] bg-[#1e3a5f]/80 text-white rounded-[2rem] shadow-2xl backdrop-blur-xl border border-white/10 overflow-hidden animate-in fade-in zoom-in duration-300">
+      {/* Header Section */}
+      <div className="p-5 pb-2">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2 bg-white/10 px-2.5 py-1 rounded-full border border-white/5">
             <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white/90">
-              Live: {today}
+            <span className="text-[9px] font-bold uppercase tracking-wider">
+              Live Station
             </span>
           </div>
           <button
             onClick={() => setIsExpanded(false)}
-            className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all"
+            className="hover:bg-white/10 p-1.5 rounded-full transition-colors"
           >
-            <X size={18} />
+            <X size={16} className="opacity-60 hover:opacity-100" />
           </button>
         </div>
 
-        <div className="flex items-end justify-between relative z-10">
-          <div className="flex flex-col">
-            <span className="text-7xl drop-shadow-md mb-2">
-              {weather?.icon || "☀️"}
-            </span>
-            <p className="text-lg font-semibold tracking-tight">
-              {weather?.condition}
-            </p>
-          </div>
+        <div className="flex items-center justify-between px-1">
+          <span className="text-5xl drop-shadow-md">
+            {weather?.icon || "☀️"}
+          </span>
           <div className="text-right">
             <div className="flex items-start justify-end">
-              <span className="text-7xl font-light tracking-tighter leading-none">
+              <span className="text-5xl font-light tracking-tighter leading-none">
                 {weather?.temp ?? "--"}
               </span>
-              <span className="text-2xl font-medium mt-1">°</span>
+              <span className="text-xl font-medium mt-0.5">°</span>
             </div>
-            <div className="flex items-center justify-end gap-1.5 text-white/70 mt-1">
-              <MapPin size={12} />
-              <span className="text-xs font-medium uppercase tracking-wider">
-                {weather?.location}
-              </span>
-            </div>
+            <p className="text-[11px] font-bold text-blue-300 uppercase tracking-tighter">
+              {weather?.condition}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Modern Stats Content */}
-      <div className="p-8">
+      {/* Grid Section (Glass Cards) */}
+      <div className="p-5 pt-4">
         {loading ? (
-          <div className="flex flex-col items-center py-10">
-            <RefreshCw
-              size={32}
-              className="animate-spin text-[#1572D3]/30 mb-4"
-            />
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-              Refreshing Data
-            </span>
+          <div className="flex flex-col items-center py-6">
+            <RefreshCw size={20} className="animate-spin opacity-40 mb-2" />
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              {/* Stat Card 1: Humidity */}
-              <div className="group flex flex-col p-5 bg-slate-50 hover:bg-blue-50 transition-colors rounded-[2rem] border border-slate-100">
-                <div className="bg-white p-2 w-fit rounded-xl shadow-sm mb-3 group-hover:text-[#1572D3]">
-                  <Droplet size={20} />
-                </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">
+            <div className="grid grid-cols-2 gap-2.5 mb-5">
+              {/* Humidity */}
+              <div className="flex flex-col p-3 bg-white/5 rounded-2xl border border-white/5">
+                <Droplet size={16} className="text-[#1572D3] mb-2" />
+                <span className="text-[8px] font-bold text-white/40 uppercase mb-0.5">
                   Humidity
                 </span>
-                <span className="text-xl font-bold text-slate-800">
-                  {weather?.humidity}%
-                </span>
+                <span className="text-sm font-bold">{weather?.humidity}%</span>
               </div>
 
-              {/* Stat Card 2: Wind Speed */}
-              <div className="group flex flex-col p-5 bg-slate-50 hover:bg-blue-50 transition-colors rounded-[2rem] border border-slate-100">
-                <div className="bg-white p-2 w-fit rounded-xl shadow-sm mb-3 group-hover:text-[#1572D3]">
-                  <Wind size={20} />
-                </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">
+              {/* Wind */}
+              <div className="flex flex-col p-3 bg-white/5 rounded-2xl border border-white/5">
+                <Wind size={16} className="text-[#1572D3] mb-2" />
+                <span className="text-[8px] font-bold text-white/40 uppercase mb-0.5">
                   Wind
                 </span>
-                <span className="text-xl font-bold text-slate-800">
-                  {weather?.windSpeed} <span className="text-xs">kt</span>
+                <span className="text-sm font-bold">
+                  {weather?.windSpeed}{" "}
+                  <span className="text-[10px] opacity-50 font-normal">kt</span>
                 </span>
               </div>
 
-              {/* Stat Card 3: Direction */}
-              <div className="group flex flex-col p-5 bg-slate-50 hover:bg-blue-50 transition-colors rounded-[2rem] border border-slate-100">
-                <div className="bg-white p-2 w-fit rounded-xl shadow-sm mb-3 group-hover:text-[#1572D3]">
-                  <Navigation
-                    size={20}
-                    style={{ transform: `rotate(${weather?.windDir}deg)` }}
-                    className="transition-transform duration-1000"
-                  />
-                </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">
+              {/* Direction */}
+              <div className="flex flex-col p-3 bg-white/5 rounded-2xl border border-white/5">
+                <Navigation
+                  size={16}
+                  style={{ transform: `rotate(${weather?.windDir}deg)` }}
+                  className="text-[#1572D3] mb-2 transition-transform duration-1000"
+                />
+                <span className="text-[8px] font-bold text-white/40 uppercase mb-0.5">
                   Direction
                 </span>
-                <span className="text-xl font-bold text-slate-800">
-                  {weather?.windDir}°
-                </span>
+                <span className="text-sm font-bold">{weather?.windDir}°</span>
               </div>
 
-              {/* Stat Card 4: Rainfall */}
-              <div className="group flex flex-col p-5 bg-slate-50 hover:bg-blue-50 transition-colors rounded-[2rem] border border-slate-100">
-                <div className="bg-white p-2 w-fit rounded-xl shadow-sm mb-3 group-hover:text-[#1572D3]">
-                  <Sunrise size={20} />
-                </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">
-                  Rainfall
+              {/* Rainfall */}
+              <div className="flex flex-col p-3 bg-white/5 rounded-2xl border border-white/5">
+                <Cloud size={16} className="text-[#1572D3] mb-2" />
+                <span className="text-[8px] font-bold text-white/40 uppercase mb-0.5">
+                  Rain
                 </span>
-                <span className="text-xl font-bold text-slate-800">
-                  {weather?.rainfall} <span className="text-xs">mm</span>
+                <span className="text-sm font-bold">
+                  {weather?.rainfall}{" "}
+                  <span className="text-[10px] opacity-50 font-normal">mm</span>
                 </span>
               </div>
             </div>
 
-            {/* Interactive Footer */}
-            <button
-              onClick={fetchWeather}
-              disabled={loading}
-              className="w-full py-4 bg-[#1572D3] hover:bg-[#1261b5] text-white rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-[0.98]"
-            >
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              Refresh Analytics
-            </button>
+            {/* Compact Footer */}
+            <div className="flex items-center justify-between border-t border-white/10 pt-4 px-1">
+              <div className="flex items-center gap-2 opacity-60">
+                <MapPin size={12} />
+                <span className="text-[10px] font-bold truncate max-w-[120px]">
+                  {weather?.location}
+                </span>
+              </div>
+              <button
+                onClick={fetchWeather}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <RefreshCw
+                  size={14}
+                  className={loading ? "animate-spin" : ""}
+                />
+              </button>
+            </div>
           </>
         )}
       </div>
