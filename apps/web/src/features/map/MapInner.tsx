@@ -35,11 +35,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// apps/web/src/features/map/MapInner.tsx
-
 const createMRTIcon = (stationLines: string[], currentZoom: number) => {
   const colors = stationLines.map((line) => MRT_COLORS[line] || "#748477");
 
+  // Dynamic Sizing based on Zoom
+  // Zoom 12 (Default) = 24px, Zoom 10 (Out) = 12px, Zoom 15 (In) = 32px
   const baseSize = currentZoom < 12 ? 12 : currentZoom > 14 ? 32 : 24;
   const innerSize = baseSize * 0.6;
   const iconOffset = baseSize / 2;
@@ -61,7 +61,6 @@ const createMRTIcon = (stationLines: string[], currentZoom: number) => {
     html: `
       <div class="relative flex items-center justify-center transition-all duration-300" 
            style="width: ${baseSize}px; height: ${baseSize}px;">
-        
         <div class="absolute w-full h-full rounded-[4px] rotate-45 shadow-sm border border-white/30" 
              style="${backgroundStyle}">
         </div>
@@ -69,16 +68,16 @@ const createMRTIcon = (stationLines: string[], currentZoom: number) => {
         ${
           currentZoom > 11
             ? `
-          <div class="absolute bg-slate-50 rounded-full flex items-center justify-center z-10 shadow-inner"
+          <div class="absolute bg-white rounded-full flex items-center justify-center z-10 shadow-inner"
                style="width: ${innerSize}px; height: ${innerSize}px;">
-             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1572D3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-               <path d="M7 15h10" />
-               <path d="M12 15V5" />
-               <path d="M7 11h10" />
-               <rect x="3" y="5" width="18" height="15" rx="2" />
-               <path d="m8 21-2-2" />
-               <path d="m16 21 2-2" />
-             </svg>
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-slate-800">
+             <path d="M7 15h10" />
+             <path d="M12 15V5" />
+             <path d="M7 11h10" />
+             <rect x="3" y="5" width="18" height="15" rx="2" />
+             <path d="m8 21-2-2" />
+             <path d="m16 21 2-2" />
+           </svg>
           </div>
         `
             : ""

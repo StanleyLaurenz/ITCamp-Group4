@@ -45,6 +45,7 @@ export default function WeatherWidget() {
     fetchWeather();
   }, []);
 
+  // 1. COLLAPSED STATE (Compact & Glassy)
   if (!isExpanded) {
     return (
       <button
