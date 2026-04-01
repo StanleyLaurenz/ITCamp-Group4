@@ -58,15 +58,14 @@ export function MapFeature() {
     isLoggedIn
   );
 
-  // Inside MapFeature.tsx -> fetchAllData function
+  // Fetches static data (Attraction and MRT) when the component mounts
   useEffect(() => {
-    async function fetchAllMapData() {
+    async function fetchAttractionAndMRTData() {
       setLoading(true);
       try {
-        const [attractionsData, mrtDataResponse, taxiData] = await Promise.all([
+        const [attractionsData, mrtDataResponse] = await Promise.all([
           getAttractions(),
           getMRTStations(),
-          getTaxis()
         ]);
 
         // Flatten the data so LandmarkPopup gets exactly what it expects
@@ -98,14 +97,13 @@ export function MapFeature() {
         // Feed markers with data
         setLandmarks(flattenedLandmarks);
         setMrtData(mrtDataResponse);
-        setTaxis(taxiData)
       } catch (err) {
-        setError("Failed to load map data.");
+        setError("Failed to load Attraction or MRT data.");
       } finally {
         setLoading(false);
       }
     }
-    fetchAllMapData();
+    fetchAttractionAndMRTData();
   }, []);
 
   const toggleMRTLine = (lineName: string) => {
@@ -115,6 +113,27 @@ export function MapFeature() {
         : [...prev, lineName]
     );
   };
+
+  // Fetches taxi data (dynamic)
+  useEffect(() => {
+    if(!showTaxi) { // When taxi tracker is off
+      setTaxis([]); // Clears marked taxis (if any)
+      return; // No data fetching
+    }
+
+    const fetchTaxiData = async() => {
+      try { // Get taxi data and feed them to the markers
+        const taxiData = await getTaxis();
+        setTaxis(taxiData);
+      } catch (err) {
+        setError(`Failed to load taxi data - ${err}`);
+      }
+    }
+
+    fetchTaxiData();
+    const interval = setInterval(fetchTaxiData, 35000); // Updates markers every 35 seconds
+    return () => clearInterval(interval) // returns a cleanup function (stops the timer)
+  }, [showTaxi]);
 
   if (loading) {
     return (
