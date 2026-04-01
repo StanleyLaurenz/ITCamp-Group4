@@ -1,68 +1,54 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-// Helper to get the average reading across all stations
 function getAverage(readings: { value: number }[]): number {
-  if (!readings.length) return 0;
+  if (!readings || !readings.length) return 0;
   const sum = readings.reduce((acc, r) => acc + r.value, 0);
   return Math.round(sum / readings.length);
 }
 
-// Derive a weather condition from the data
-function getCondition(rainfall: number, humidity: number): string {
-  if (rainfall > 1) return 'Rainy';
-  if (rainfall > 0) return 'Light Rain';
-  if (humidity > 85) return 'Cloudy';
-  if (humidity > 70) return 'Partly Cloudy';
-  return 'Sunny';
-}
-
-// Pick an emoji icon based on condition
-function getIcon(condition: string): string {
-  if (condition.includes('Rain')) return '🌧️';
-  if (condition === 'Cloudy') return '☁️';
-  if (condition === 'Partly Cloudy') return '⛅';
-  return '☀️';
-}
-
 export async function GET() {
   try {
-    const BASE = 'https://api-open.data.gov.sg/v2/real-time/api';
+    const BASE = "https://api-open.data.gov.sg/v2/real-time/api";
 
-    const [tempRes, humidityRes, rainfallRes] = await Promise.all([
-      fetch(`${BASE}/air-temperature`),
-      fetch(`${BASE}/relative-humidity`),
-      fetch(`${BASE}/rainfall`),
-    ]);
+    // Fetching all data points in parallel
+    const [tempRes, humidityRes, rainfallRes, windSpeedRes, windDirRes] =
+      await Promise.all([
+        fetch(`${BASE}/air-temperature`),
+        fetch(`${BASE}/relative-humidity`),
+        fetch(`${BASE}/rainfall`),
+        fetch(`${BASE}/wind-speed`),
+        fetch(`${BASE}/wind-direction`),
+      ]);
 
-    const [tempData, humidityData, rainfallData] = await Promise.all([
-      tempRes.json(),
-      humidityRes.json(),
-      rainfallRes.json(),
-    ]);
+    const [tempData, humidityData, rainfallData, windSpeedData, windDirData] =
+      await Promise.all([
+        tempRes.json(),
+        humidityRes.json(),
+        rainfallRes.json(),
+        windSpeedRes.json(),
+        windDirRes.json(),
+      ]);
 
-    const temperature = getAverage(
-      tempData.data?.readings?.[0]?.data ?? []
-    );
-    const humidity = getAverage(
-      humidityData.data?.readings?.[0]?.data ?? []
-    );
-    const rainfall = getAverage(
-      rainfallData.data?.readings?.[0]?.data ?? []
-    );
-
-    const condition = getCondition(rainfall, humidity);
-    const icon = getIcon(condition);
+    const temp = getAverage(tempData.data?.readings?.[0]?.data ?? []);
+    const humidity = getAverage(humidityData.data?.readings?.[0]?.data ?? []);
+    const rainfall = getAverage(rainfallData.data?.readings?.[0]?.data ?? []);
+    const windSpeed = getAverage(windSpeedData.data?.readings?.[0]?.data ?? []);
+    const windDir = getAverage(windDirData.data?.readings?.[0]?.data ?? []);
 
     return NextResponse.json({
-      temp: temperature,
+      temp,
       humidity,
       rainfall,
-      condition,
-      icon,
-      location: 'Singapore',
+      windSpeed,
+      windDir,
+      condition: rainfall > 0 ? "Rainy" : humidity > 80 ? "Cloudy" : "Sunny",
+      icon: rainfall > 0 ? "🌧️" : humidity > 80 ? "☁️" : "☀️",
+      location: "Singapore",
     });
-
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch weather' }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch weather" },
+      { status: 500 }
+    );
   }
 }
