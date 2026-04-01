@@ -11,6 +11,8 @@ import { LocationCard } from "@/features/location/LocationCard";
 import { getCategories } from "@/utils/categorize";
 import Navbar from "@/components/Navbar"; // Ensure this path is correct
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { calculateDistance } from "@/utils/distance";
+import { getStaticRating } from "@/utils/generateRating";
 
 export default function SavedPage() {
   const { user, loading: authLoading } = useAuth();
@@ -32,11 +34,27 @@ export default function SavedPage() {
     }
   }, [isLoggedIn, authLoading, router]);
 
+  // Inside SavedPage() component
   useEffect(() => {
     async function loadData() {
+      setIsLoading(true);
       try {
         const data = await getAttractions();
-        setAttractions(data);
+
+        // Flatten the data immediately so it matches your other pages
+        const flattened = (data || []).map((item: any) => {
+          const id = Number(item.properties?.OBJECTID_1);
+          return {
+            ...item,
+            id: id,
+            // Generate the static rating here
+            rating: getStaticRating(id),
+            // Generate categories here
+            categories: getCategories(item),
+          };
+        });
+
+        setAttractions(flattened);
       } catch (error) {
         console.error("Failed to fetch attractions:", error);
       } finally {
@@ -124,14 +142,14 @@ export default function SavedPage() {
                   id={item.properties.OBJECTID_1}
                   title={item.properties.PAGETITLE}
                   mrtLocation={item.properties.ADDRESS || "Singapore"}
-                  rating={4.5}
+                  rating={item.rating}
                   categories={getCategories(item)}
                   imageUrl={item.imageUrl}
                   isFavorite={true}
                   onFavoriteToggle={() =>
                     toggleSave(Number(item.properties.OBJECTID_1))
                   }
-                  item={item}
+                  item={item} // This now contains the 'nearestMRT' property
                 />
               ))}
             </div>
@@ -162,3 +180,4 @@ export default function SavedPage() {
     </div>
   );
 }
+

@@ -13,6 +13,7 @@ interface LocationCardProps {
   title: string;
   rating: number;
   mrtLocation: string;
+  nearestMRT?: string; // Add this line
   categories: string[];
   isFavorite: boolean;
   onFavoriteToggle: () => void;
@@ -91,11 +92,50 @@ export function LocationCard({
       </button>
 
       {/* 4. Content Section */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white space-y-4">
-        {/* Rating and Details Row */}
-        <div className="flex gap-3 items-center">
-          <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10">
-            <Star size={12} className="text-yellow-400 fill-yellow-400" />
+      {/* 4. Content Section */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white space-y-3">
+        {/* 1. MRT Pre-header (Top of Title) */}
+        {item.nearestMRT && (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border transition-all active:scale-95 group/mrt w-fit bg-[#1572D3]/20 border-[#1572D3]/30">
+      {/* MRT Icon (SVG) */}
+      <svg 
+        width="14" 
+        height="14" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className="flex-shrink-0 text-[#1572D3]"
+      >
+        <rect x="4" y="3" width="16" height="15" rx="2" />
+        <path d="M4 11h16M8 18l-2 3M16 18l2 3" />
+      </svg>
+      
+      <span className="text-[10px] font-black uppercase text-white tracking-[0.1em] drop-shadow-md">
+        {item.nearestMRT}
+      </span>
+    </div>
+  )}
+
+        {/* 2. Title & Address Row */}
+        <div className="space-y-1">
+          <h3 className="text-xl font-bold leading-tight line-clamp-2 tracking-tight text-white drop-shadow-lg">
+            {title}
+          </h3>
+          <div className="flex items-center gap-1.5 text-white/60 text-[11px]">
+            <MapPin size={10} className="flex-shrink-0 text-[#1572D3]" />
+            <span className="font-medium truncate text-white/70">
+              {mrtLocation}
+            </span>
+          </div>
+        </div>
+
+        {/* 3. Rating and Details Row */}
+        <div className="flex gap-2 items-center pt-1">
+          <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10">
+            <Star size={10} className="text-yellow-400 fill-yellow-400" />
             <span className="font-bold text-[10px] text-white">
               {rating.toFixed(1)}
             </span>
@@ -107,32 +147,19 @@ export function LocationCard({
               e.stopPropagation();
               setShowDetails(true);
             }}
-            className="flex items-center gap-1.5 text-[10px] font-bold hover:bg-white/20 transition-colors bg-white/10 backdrop-blur-lg px-3 py-1.5 rounded-xl border border-white/10 text-white"
+            className="flex items-center gap-1.5 text-[10px] font-bold hover:bg-white/20 transition-colors bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-white"
           >
             <Info size={12} />
             Details
           </button>
         </div>
 
-        {/* Title & Location */}
-        <div className="space-y-1">
-          <h3 className="text-xl font-bold leading-tight line-clamp-2 tracking-tight text-white">
-            {title}
-          </h3>
-          <div className="flex items-center gap-1.5 text-white/70 text-xs">
-            <MapPin size={12} className="text-[#1572D3]" />
-            <span className="font-medium truncate text-white/80">
-              {mrtLocation}
-            </span>
-          </div>
-        </div>
-
-        {/* Categories Grid */}
-        <div className="flex items-center flex-wrap gap-2">
+        {/* 4. Categories Grid */}
+        <div className="flex items-center flex-wrap gap-1.5">
           {categories.map((cat) => (
             <span
               key={cat}
-              className={`px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase border backdrop-blur-md transition-colors ${
+              className={`px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest uppercase border backdrop-blur-md ${
                 categoryStyles[cat] || categoryStyles["Landmark"]
               }`}
             >
@@ -141,11 +168,11 @@ export function LocationCard({
           ))}
         </div>
 
-        {/* UPDATED: View Map Button with Link */}
+        {/* 5. View Map Button */}
         <Link
           href={`/map?selectedId=${id}`}
-          onClick={(e) => e.stopPropagation()} // Prevent card details from opening
-          className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-[#1572D3] !text-white rounded-2xl text-xs font-black tracking-widest shadow-lg hover:bg-[#125ba8] transition-all active:scale-[0.98] mt-2 uppercase"
+          onClick={(e) => e.stopPropagation()}
+          className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-[#1572D3] !text-white rounded-2xl text-[10px] font-black tracking-widest shadow-lg hover:bg-[#125ba8] transition-all active:scale-[0.98] mt-2 uppercase"
         >
           <Map size={14} className="text-white" />
           View Map

@@ -15,8 +15,9 @@
     "@types/nprogress": "^0.2.3",
     "concurrently": "^9.2.1"
   },
-  "dependencies": {
-    "nprogress": "^0.2.0",
-    "react-feather": "^2.0.10"
-  }
+"dependencies": {
+  "nprogress": "^0.2.0",
+  "cors": "^2.8.6",
+  "react-feather": "^2.0.10"
+}
 }

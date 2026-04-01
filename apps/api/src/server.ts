@@ -4,7 +4,9 @@ import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { healthRouter } from "./routes/healthRoutes.js";
 import { attractionRouter } from "./routes/attractionRoutes.js";
-import { taxiRouter} from "./routes/taxiRoutes.js";
+import { taxiRouter } from "./routes/taxiRoutes.js";
+import { weatherRouter } from "./routes/weatherRoutes.js";
+import { mrtRouter } from "./routes/mrtRoutes.js"
 
 // Creates server instance
 const app = express();
@@ -31,6 +33,8 @@ app.get("/", (_request, response) => {
 app.use("/api", healthRouter);
 app.use("/api/attractions", attractionRouter);
 app.use("/api/taxi", taxiRouter);
+app.use("/api/mrt", mrtRouter); 
+app.use("/api/weather", weatherRouter);
 
 app.use(errorHandler);
 

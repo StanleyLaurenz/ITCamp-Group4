@@ -126,7 +126,7 @@ export function SavedSection({
                   id={id.toString()}
                   item={item}
                   title={item["properties"]["PAGETITLE"]}
-                  rating={4.8}
+                  rating={item.rating}
                   mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
                   categories={dynamicCategory}
                   imageUrl={item["imageUrl"]}

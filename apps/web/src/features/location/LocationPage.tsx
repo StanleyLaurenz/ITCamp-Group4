@@ -12,6 +12,7 @@ import { BrowseSection } from "./BrowseSection";
 import { DetailsPopUp } from "./DetailsPopUp";
 import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
+import { calculateDistance } from "@/utils/distance";
 
 export function LocationPage() {
   const searchParams = useSearchParams();
@@ -37,11 +38,25 @@ export function LocationPage() {
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       try {
-        const data = await getAttractions();
-        setAttractions(data || []);
+        const attractionsData = await getAttractions();
+
+        // FLATTEN EVERYTHING HERE
+        const unifiedData = (attractionsData || []).map((item: any) => {
+          const id = Number(item.properties?.OBJECTID_1);
+          return {
+            ...item,
+            id: id, // Top-level ID
+            rating: getStaticRating(id), // Top-level Rating (Calculated once)
+            categories: getCategories(item), // Top-level Categories
+            // nearestMRT is already attached by backend
+          };
+        });
+
+        setAttractions(unifiedData);
       } catch (error) {
-        console.error("Failed to fetch attractions:", error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -81,7 +96,7 @@ export function LocationPage() {
       selectedCategories.some((cat) => itemCats.includes(cat));
 
     // 3. Rating Match
-    const itemRating = getStaticRating(Number(properties["OBJECTID_1"]));
+    const itemRating = getStaticRating(Number(item.properties.OBJECTID_1));
     const ratingMatch = itemRating >= minRating;
 
     return titleMatch && categoryMatch && ratingMatch;
