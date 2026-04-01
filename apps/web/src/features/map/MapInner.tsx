@@ -2,11 +2,11 @@
 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, Circle } from "react-leaflet";
 import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
-import type { Landmark } from "./types";
-import { Popup, useMap, Polyline, CircleMarker } from "react-leaflet";
+import type { Landmark, WeatherStation } from "./types";
+import { Popup, useMap } from "react-leaflet";
 
 const MRT_COLORS: Record<string, string> = {
   "NORTH-SOUTH LINE": "#D42E12",
@@ -91,9 +91,8 @@ const createCustomMarker = (isSelected: boolean, isSaved: boolean) => {
 
   return L.divIcon({
     className: "custom-marker-icon",
-    html: `<div class="group relative flex items-center justify-center transition-all duration-200 ${
-      isSelected ? "scale-125 z-[1000]" : "hover:scale-110"
-    }">
+    html: `<div class="group relative flex items-center justify-center transition-all duration-200 ${isSelected ? "scale-125 z-[1000]" : "hover:scale-110"
+      }">
       <svg 
         width="32" 
         height="32" 
@@ -110,10 +109,9 @@ const createCustomMarker = (isSelected: boolean, isSaved: boolean) => {
         />
         <circle cx="12" cy="10.5" r="2.5" fill="white" />
       </svg>
-      ${
-        isSelected
-          ? `<div class="absolute inset-0 -z-10 h-8 w-8 animate-ping rounded-full opacity-20" style="background-color: ${markerColor}"></div>`
-          : ""
+      ${isSelected
+        ? `<div class="absolute inset-0 -z-10 h-8 w-8 animate-ping rounded-full opacity-20" style="background-color: ${markerColor}"></div>`
+        : ""
       }
     </div>`,
     iconSize: [32, 32],
@@ -195,6 +193,8 @@ export default function MapInner({
   initialSelectedId,
   isLoggedIn,
   showLandmarks,
+  showTaxi: _showTaxi,
+  showRain,
   showSavedOnly,
   showMRT,
   mrtData,
@@ -204,8 +204,11 @@ export default function MapInner({
     initialSelectedId
   );
   const [currentZoom, setCurrentZoom] = useState(12); // Default zoom level
+  const [weatherData, setWeatherData] = useState<WeatherStation[]>([]);
 
-  const handleClose = () => setSelectedId(null);
+  const handleClose = () => {
+    setSelectedId(null);
+  };
 
   return (
     <div className="relative w-full h-full">

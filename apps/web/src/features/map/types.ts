@@ -10,3 +10,9 @@ export interface Landmark {
   rating: number;
   nearestMRT?: string; // Add this line
 }
+
+export type WeatherStation = {
+  lat: number;
+  lng: number;
+  value: number;
+};

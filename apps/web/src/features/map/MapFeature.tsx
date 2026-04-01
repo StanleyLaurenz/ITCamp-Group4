@@ -1,5 +1,6 @@
 "use client";
 
+import WeatherWidget from "@/components/weatherWidget";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -123,35 +124,37 @@ export function MapFeature() {
 
   return (
     <div className="relative flex-1 w-full overflow-hidden">
-      <MapInner
-        landmarks={landmarks}
-        initialSelectedId={initialId ? Number(initialId) : null}
-        savedIds={savedIds}
-        onToggleSave={toggleSave}
-        isLoggedIn={isLoggedIn}
-        showLandmarks={showLandmarks}
-        showTaxi={showTaxi}
-        showRain={showRain}
-        showSavedOnly={showSavedOnly}
-        showMRT={showMRT}
-        mrtData={mrtData}
-        activeLines={activeLines}
-      />
+<MapInner
+  landmarks={landmarks}
+  initialSelectedId={initialId ? Number(initialId) : null}
+  savedIds={savedIds}
+  onToggleSave={toggleSave}
+  isLoggedIn={isLoggedIn}
+  showLandmarks={showLandmarks}
+  showTaxi={showTaxi}
+  showRain={showRain}
+  showSavedOnly={showSavedOnly}
+  showMRT={showMRT}
+  mrtData={mrtData}
+  activeLines={activeLines}
+/>
 
-      {/* Main Filter Bar */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-6 z-[500] flex flex-col items-center gap-3 w-fit max-w-[95vw]">
-        <div className="flex items-center gap-1.5 rounded-[28px] border border-white/40 bg-white/80 p-1.5 shadow-2xl backdrop-blur-2xl">
-          <button
-            onClick={() => setShowLandmarks(!showLandmarks)}
-            className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
-              showLandmarks
-                ? "bg-[#1572D3] text-white"
-                : "text-slate-500 hover:bg-slate-200/50"
-            }`}
-          >
-            <MapPin size={18} />
-            <span className="text-[11px] font-black uppercase">Landmarks</span>
-          </button>
+<WeatherWidget />
+
+{/* Main Filter Bar */}
+<div className="absolute left-1/2 -translate-x-1/2 top-6 z-[500] flex flex-col items-center gap-3 w-fit max-w-[95vw]">
+  <div className="flex items-center gap-1.5 rounded-[28px] border border-white/40 bg-white/80 p-1.5 shadow-2xl backdrop-blur-2xl">
+    <button
+      onClick={() => setShowLandmarks(!showLandmarks)}
+      className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
+        showLandmarks
+          ? "bg-[#1572D3] text-white"
+          : "text-slate-500 hover:bg-slate-200/50"
+      }`}
+    >
+      <MapPin size={18} />
+      <span className="text-[11px] font-black uppercase">Landmarks</span>
+    </button>
 
           <button
             onClick={() => setShowTaxi(!showTaxi)}
