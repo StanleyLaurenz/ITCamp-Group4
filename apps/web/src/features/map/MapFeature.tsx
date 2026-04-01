@@ -131,7 +131,7 @@ export function MapFeature() {
     }
 
     fetchTaxiData();
-    const interval = setInterval(fetchTaxiData, 35000); // Updates markers every 35 seconds
+    const interval = setInterval(fetchTaxiData, 60000); // Updates markers every 1 minute
     return () => clearInterval(interval) // returns a cleanup function (stops the timer)
   }, [showTaxi]);
 
