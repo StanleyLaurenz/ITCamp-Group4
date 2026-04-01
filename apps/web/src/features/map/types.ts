@@ -13,7 +13,7 @@ export interface Landmark {
 
 export interface Taxi {
   lat: number;
-  lang: number;
+  lng: number;
 }
 
 export type WeatherStation = {

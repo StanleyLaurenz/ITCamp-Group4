@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { MapPin, CloudRain, Heart } from "react-feather";
-import { getAttractions, getMRTStations } from "@/lib/api";
+import { getAttractions, getMRTStations, getTaxis } from "@/lib/api";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
 import { useAuth } from "@/context/AuthContext";
-import type { Landmark } from "./types";
+import type { Landmark, Taxi } from "./types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { calculateDistance } from "@/utils/distance";
+// import { calculateDistance } from "@/utils/distance";
 
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
 
@@ -29,17 +29,12 @@ export function MapFeature() {
   const searchParams = useSearchParams();
   const initialId = searchParams.get("selectedId");
 
-  const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showFullMRTMap, setShowFullMRTMap] = useState(false);
 
-  // Layer States
-  const [showLandmarks, setShowLandmarks] = useState(true);
-  const [showTaxi, setShowTaxi] = useState(false);
-  const [showRain, setShowRain] = useState(false);
-  const [showSavedOnly, setShowSavedOnly] = useState(false);
-  const [showMRT, setShowMRT] = useState(false);
+  // Initial data states
+  const [landmarks, setLandmarks] = useState<Landmark[]>([]);
+  const [taxis, setTaxis] = useState<Taxi[]>([])
   const [activeLines, setActiveLines] = useState<string[]>(
     Object.keys(MRT_COLORS)
   );
@@ -47,6 +42,14 @@ export function MapFeature() {
     stations: any[];
     lines: any[];
   } | null>(null);
+
+  // Layer States
+  const [showLandmarks, setShowLandmarks] = useState(true);
+  const [showTaxi, setShowTaxi] = useState(false);
+  const [showRain, setShowRain] = useState(false);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [showMRT, setShowMRT] = useState(false);
+  const [showFullMRTMap, setShowFullMRTMap] = useState(false);
 
   const { user } = useAuth();
   const isLoggedIn = !!user;
@@ -60,12 +63,11 @@ export function MapFeature() {
     async function fetchAllMapData() {
       setLoading(true);
       try {
-        const [attractionsData, mrtDataResponse] = await Promise.all([
+        const [attractionsData, mrtDataResponse, taxiData] = await Promise.all([
           getAttractions(),
           getMRTStations(),
+          getTaxis()
         ]);
-
-        console.log(attractionsData);
 
         // Flatten the data so LandmarkPopup gets exactly what it expects
         // Inside MapFeature.tsx -> fetchAllMapData function
@@ -93,10 +95,10 @@ export function MapFeature() {
           };
         });
 
-        setLandmarks(flattenedLandmarks);
-
+        // Feed markers with data
         setLandmarks(flattenedLandmarks);
         setMrtData(mrtDataResponse);
+        setTaxis(taxiData)
       } catch (err) {
         setError("Failed to load map data.");
       } finally {
@@ -132,6 +134,7 @@ export function MapFeature() {
         isLoggedIn={isLoggedIn}
         showLandmarks={showLandmarks}
         showTaxi={showTaxi}
+        taxis={taxis}
         showRain={showRain}
         showSavedOnly={showSavedOnly}
         showMRT={showMRT}

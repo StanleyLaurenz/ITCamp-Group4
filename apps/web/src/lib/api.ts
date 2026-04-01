@@ -58,6 +58,8 @@ export async function getTaxis() {
   if (!response.ok) {
     throw new Error(`Failed to get taxi coordinates: ${response.status}`);
   }
+
+  const data = await response.json()
   
-  return response.json();
+  return data.coords;
 }
