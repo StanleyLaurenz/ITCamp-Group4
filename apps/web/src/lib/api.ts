@@ -1,5 +1,10 @@
 function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+  const url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  if (!url) { 
+    throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
+  }
+  return url
 }
 
 export async function getMRTStations() {
