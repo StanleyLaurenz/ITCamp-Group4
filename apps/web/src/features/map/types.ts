@@ -11,6 +11,11 @@ export interface Landmark {
   nearestMRT?: string; // Add this line
 }
 
+export interface Taxi {
+  lat: number;
+  lng: number;
+}
+
 export type WeatherStation = {
   lat: number;
   lng: number;

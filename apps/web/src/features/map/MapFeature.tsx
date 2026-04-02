@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { MapPin, CloudRain, Heart } from "react-feather";
-import { getAttractions, getMRTStations } from "@/lib/api";
+import { getAttractions, getMRTStations, getTaxis } from "@/lib/api";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
 import { useAuth } from "@/context/AuthContext";
-import type { Landmark } from "./types";
+import type { Landmark, Taxi } from "./types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { calculateDistance } from "@/utils/distance";
+// import { calculateDistance } from "@/utils/distance";
 
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
 
@@ -29,17 +29,12 @@ export function MapFeature() {
   const searchParams = useSearchParams();
   const initialId = searchParams.get("selectedId");
 
-  const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showFullMRTMap, setShowFullMRTMap] = useState(false);
 
-  // Layer States
-  const [showLandmarks, setShowLandmarks] = useState(true);
-  const [showTaxi, setShowTaxi] = useState(false);
-  const [showRain, setShowRain] = useState(false);
-  const [showSavedOnly, setShowSavedOnly] = useState(false);
-  const [showMRT, setShowMRT] = useState(false);
+  // Initial data states
+  const [landmarks, setLandmarks] = useState<Landmark[]>([]);
+  const [taxis, setTaxis] = useState<Taxi[]>([])
   const [activeLines, setActiveLines] = useState<string[]>(
     Object.keys(MRT_COLORS)
   );
@@ -48,6 +43,14 @@ export function MapFeature() {
     lines: any[];
   } | null>(null);
 
+  // Layer States
+  const [showLandmarks, setShowLandmarks] = useState(true);
+  const [showTaxi, setShowTaxi] = useState(false);
+  const [showRain, setShowRain] = useState(false);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [showMRT, setShowMRT] = useState(false);
+  const [showFullMRTMap, setShowFullMRTMap] = useState(false);
+
   const { user } = useAuth();
   const isLoggedIn = !!user;
   const { savedIds, toggleSave } = useSavedLocations(
@@ -55,17 +58,15 @@ export function MapFeature() {
     isLoggedIn
   );
 
-  // Inside MapFeature.tsx -> fetchAllData function
+  // Fetches static data (Attraction and MRT) when the component mounts
   useEffect(() => {
-    async function fetchAllMapData() {
+    async function fetchAttractionAndMRTData() {
       setLoading(true);
       try {
         const [attractionsData, mrtDataResponse] = await Promise.all([
           getAttractions(),
           getMRTStations(),
         ]);
-
-        console.log(attractionsData);
 
         // Flatten the data so LandmarkPopup gets exactly what it expects
         // Inside MapFeature.tsx -> fetchAllMapData function
@@ -93,17 +94,16 @@ export function MapFeature() {
           };
         });
 
-        setLandmarks(flattenedLandmarks);
-
+        // Feed markers with data
         setLandmarks(flattenedLandmarks);
         setMrtData(mrtDataResponse);
       } catch (err) {
-        setError("Failed to load map data.");
+        setError("Failed to load Attraction or MRT data.");
       } finally {
         setLoading(false);
       }
     }
-    fetchAllMapData();
+    fetchAttractionAndMRTData();
   }, []);
 
   const toggleMRTLine = (lineName: string) => {
@@ -113,6 +113,27 @@ export function MapFeature() {
         : [...prev, lineName]
     );
   };
+
+  // Fetches taxi data (dynamic)
+  useEffect(() => {
+    if(!showTaxi) { // When taxi tracker is off
+      setTaxis([]); // Clears marked taxis (if any)
+      return; // No data fetching
+    }
+
+    const fetchTaxiData = async() => {
+      try { // Get taxi data and feed them to the markers
+        const taxiData = await getTaxis();
+        setTaxis(taxiData);
+      } catch (err) {
+        setError(`Failed to load taxi data - ${err}`);
+      }
+    }
+
+    fetchTaxiData();
+    const interval = setInterval(fetchTaxiData, 60000); // Updates markers every 1 minute
+    return () => clearInterval(interval) // returns a cleanup function (stops the timer)
+  }, [showTaxi]);
 
   if (loading) {
     return (
@@ -132,6 +153,7 @@ export function MapFeature() {
         isLoggedIn={isLoggedIn}
         showLandmarks={showLandmarks}
         showTaxi={showTaxi}
+        taxis={taxis}
         showRain={showRain}
         showSavedOnly={showSavedOnly}
         showMRT={showMRT}

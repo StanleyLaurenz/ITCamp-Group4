@@ -11,7 +11,7 @@ import {
 } from "react-leaflet";
 import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
-import type { Landmark, WeatherStation } from "./types";
+import type { Landmark, WeatherStation, Taxi } from "./types";
 import { Popup, useMap } from "react-leaflet";
 
 const MRT_COLORS: Record<string, string> = {
@@ -88,6 +88,7 @@ const createMRTIcon = (stationLines: string[], currentZoom: number) => {
     iconAnchor: [iconOffset, iconOffset],
   });
 };
+
 /**
  * Creates a custom SVG Pin marker.
  * Blue (#1572D3) for standard landmarks, Red (#EF4444) for saved ones.
@@ -153,6 +154,7 @@ interface MapInnerProps {
   showLandmarks: boolean;
   showTaxi: boolean;
   showRain: boolean;
+  taxis: Taxi[];
   showSavedOnly: boolean;
   initialSelectedId: number | null;
   showMRT: boolean;
@@ -201,8 +203,9 @@ export default function MapInner({
   initialSelectedId,
   isLoggedIn,
   showLandmarks,
-  showTaxi: _showTaxi,
-  showRain,
+  showTaxi,
+  taxis,
+  showRain: _showRain, // destructured cause it's not used inside the function yet
   showSavedOnly,
   showMRT,
   mrtData,
@@ -237,6 +240,24 @@ export default function MapInner({
           setSelectedId={setSelectedId}
         />
         <MapClickHandler onClose={() => setSelectedId(null)} />
+
+        {/* --- TAXI LAYER --- */}
+        {showTaxi &&              //Activates when the taxi button is on,
+          Array.isArray(taxis) && //if taxis is an array.
+          taxis.map((taxi, i) =>  //Maps each taxi to a Circle.
+            <Circle
+              key={i} // index for element tracking
+              center={[taxi.lat, taxi.lng]} // taxi coordinates
+              radius={3} // in metres
+              pathOptions={{ //Blue circle w/ red outline
+                color: 'red',
+                weight: 2,
+                opacity: 0.6,
+                fillColor: 'blue',
+                fillOpacity: 0.75
+              }}
+            />
+          )}
 
         {/* --- MRT LAYER --- */}
         {showMRT &&
