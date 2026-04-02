@@ -7,14 +7,21 @@ import {
   TileLayer,
   Marker,
   useMapEvents,
-  Circle,
+  CircleMarker,
 } from "react-leaflet";
 import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
 import { MRT_LINE_COLORS } from "./mrtLineColors";
-import type { Landmark, MrtStationMarker, WeatherStation } from "./types";
+import type { Landmark, MrtStationMarker, Taxi, WeatherStation } from "./types";
 import { Popup, useMap } from "react-leaflet";
 
+const TAXI_STYLE = {
+  radius: 4,
+  fillColor: "#facc15", // Bright Yellow
+  color: "#a16207", // Dark Yellow border
+  weight: 1,
+  fillOpacity: 0.9,
+};
 // Fix broken marker icons in Leaflet for Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -23,8 +30,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
-
-// apps/web/src/features/map/MapInner.tsx
 
 const createMRTIcon = (stationLines: string[], currentZoom: number) => {
   const colors = stationLines.map((line) => MRT_LINE_COLORS[line] || "#748477");
@@ -78,6 +83,7 @@ const createMRTIcon = (stationLines: string[], currentZoom: number) => {
     iconAnchor: [iconOffset, iconOffset],
   });
 };
+
 /**
  * Creates a custom SVG Pin marker.
  * Blue (#1572D3) for standard landmarks, Red (#EF4444) for saved ones.
@@ -143,6 +149,7 @@ interface MapInnerProps {
   showLandmarks: boolean;
   showTaxi: boolean;
   showRain: boolean;
+  taxis: Taxi[];
   showSavedOnly: boolean;
   initialSelectedId: number | null;
   showMRT: boolean;
@@ -191,8 +198,9 @@ export default function MapInner({
   initialSelectedId,
   isLoggedIn,
   showLandmarks,
-  showTaxi: _showTaxi,
-  showRain,
+  showTaxi,
+  taxis,
+  showRain: _showRain, // destructured cause it's not used inside the function yet
   showSavedOnly,
   showMRT,
   mrtData,
@@ -227,6 +235,29 @@ export default function MapInner({
           setSelectedId={setSelectedId}
         />
         <MapClickHandler onClose={() => setSelectedId(null)} />
+
+        {/* --- TAXI LAYER --- */}
+        {/* --- TAXI LAYER --- */}
+        {/* --- OPTIMIZED TAXI LAYER --- */}
+        {showTaxi &&
+          Array.isArray(taxis) &&
+          taxis.map((taxi, i) => (
+            <CircleMarker
+              key={`taxi-${i}`}
+              center={[taxi.lat, taxi.lng]}
+              {...TAXI_STYLE}
+              // CircleMarker is canvas-based, which is way smoother than Markers
+            >
+              <Popup className="taxi-popup">
+                <div className="flex items-center gap-2 p-1">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                  <span className="text-[10px] font-bold uppercase text-slate-700">
+                    Taxi Available
+                  </span>
+                </div>
+              </Popup>
+            </CircleMarker>
+          ))}
 
         {/* --- MRT LAYER --- */}
         {showMRT &&

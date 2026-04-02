@@ -5,16 +5,13 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { MapPin, Heart } from "react-feather";
-import { getAttractions, getMRTStations } from "@/lib/api";
+import { getAttractions, getMRTStations, getTaxis } from "@/lib/api";
 import { rawAttractionToLandmark } from "@/lib/attractionData";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { useAuth } from "@/context/AuthContext";
-import type { Landmark, MrtStationMarker } from "./types";
+import type { Landmark, MrtStationMarker, Taxi } from "./types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import {
-  MRT_FILTER_LINE_ORDER,
-  MRT_LINE_COLORS,
-} from "./mrtLineColors";
+import { MRT_FILTER_LINE_ORDER, MRT_LINE_COLORS } from "./mrtLineColors";
 
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
 
@@ -23,9 +20,11 @@ export function MapFeature() {
   const initialId = searchParams.get("selectedId");
 
   const [landmarks, setLandmarks] = useState<Landmark[]>([]);
+  const [taxis, setTaxis] = useState<Taxi[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFullMRTMap, setShowFullMRTMap] = useState(false);
 
+  // Layer States
   const [showLandmarks, setShowLandmarks] = useState(true);
   const [showTaxi, setShowTaxi] = useState(false);
   const [showRain, setShowRain] = useState(false);
@@ -44,7 +43,7 @@ export function MapFeature() {
   );
 
   useEffect(() => {
-    async function fetchAllMapData() {
+    async function fetchAttractionAndMRTData() {
       setLoading(true);
       try {
         const [attractionsData, mrtStations] = await Promise.all([
@@ -58,15 +57,44 @@ export function MapFeature() {
         );
 
         setLandmarks(flattenedLandmarks);
-        setMrtData(mrtStations);
-      } catch {
-        // Same as before: load failure leaves landmarks empty after loading ends
+        setMrtData(Array.isArray(mrtStations) ? mrtStations : []);
+      } catch (err) {
+        console.error("Failed to load Attraction or MRT data.", err);
+        setLandmarks([]);
+        setMrtData([]);
       } finally {
         setLoading(false);
       }
     }
-    fetchAllMapData();
+
+    fetchAttractionAndMRTData();
   }, []);
+
+  useEffect(() => {
+    if (!showTaxi) {
+      setTaxis([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchTaxiData = async () => {
+      try {
+        const taxiData = await getTaxis();
+        if (!cancelled) setTaxis(Array.isArray(taxiData) ? taxiData : []);
+      } catch (err) {
+        console.error("Failed to load taxi data.", err);
+      }
+    };
+
+    void fetchTaxiData();
+    const interval = setInterval(fetchTaxiData, 60000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [showTaxi]);
 
   const toggleMRTLine = (lineName: string) => {
     setActiveLines((prev) =>
@@ -94,6 +122,7 @@ export function MapFeature() {
         isLoggedIn={isLoggedIn}
         showLandmarks={showLandmarks}
         showTaxi={showTaxi}
+        taxis={taxis}
         showRain={showRain}
         showSavedOnly={showSavedOnly}
         showMRT={showMRT}
@@ -103,6 +132,7 @@ export function MapFeature() {
 
       <WeatherWidget />
 
+      {/* Main Filter Bar */}
       <div className="absolute left-1/2 -translate-x-1/2 top-6 z-[500] flex flex-col items-center gap-3 w-fit max-w-[95vw]">
         <div className="flex items-center gap-1.5 rounded-[28px] border border-white/40 bg-white/80 p-1.5 shadow-2xl backdrop-blur-2xl">
           <button
@@ -114,7 +144,9 @@ export function MapFeature() {
             }`}
           >
             <MapPin size={18} />
-            <span className="text-[11px] font-black uppercase">Landmarks</span>
+            <span className="text-[11px] font-black uppercase">
+              Landmarks
+            </span>
           </button>
 
           <button
@@ -139,7 +171,10 @@ export function MapFeature() {
                 : "text-slate-500 hover:bg-slate-200/50"
             } ${!isLoggedIn && "opacity-30 cursor-not-allowed"}`}
           >
-            <Heart size={18} className={showSavedOnly ? "fill-white" : ""} />
+            <Heart
+              size={18}
+              className={showSavedOnly ? "fill-white" : ""}
+            />
             <span className="text-[11px] font-black uppercase tracking-wider">
               Saved
             </span>
@@ -164,6 +199,7 @@ export function MapFeature() {
           </button>
         </div>
 
+        {/* Sub-menu for MRT Lines */}
         {showMRT && (
           <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-[20px] bg-white/90 p-1.5 shadow-xl backdrop-blur-md border border-slate-100 animate-in fade-in slide-in-from-top-2">
             {MRT_FILTER_LINE_ORDER.map((lineName) => (
@@ -178,9 +214,7 @@ export function MapFeature() {
               >
                 <div
                   className="w-2 h-2 rounded-full"
-                  style={{
-                    backgroundColor: MRT_LINE_COLORS[lineName],
-                  }}
+                  style={{ backgroundColor: MRT_LINE_COLORS[lineName] }}
                 />
                 {lineName.replace(" LINE", "")}
               </button>
@@ -200,6 +234,7 @@ export function MapFeature() {
         )}
       </div>
 
+      {/* Full MRT Map Modal */}
       {showFullMRTMap && (
         <div
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4"
@@ -233,3 +268,4 @@ export function MapFeature() {
     </div>
   );
 }
+

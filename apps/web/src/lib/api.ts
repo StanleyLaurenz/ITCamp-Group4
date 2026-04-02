@@ -51,3 +51,15 @@ export async function getWeather() {
     "Failed to load weather data"
   );
 }
+
+export async function getTaxis() {
+  const response = await fetch(`${getApiBaseUrl()}/api/taxi`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to get taxi coordinates: ${response.status}`);
+  }
+
+  const data = await response.json()
+  
+  return data.coords;
+}
