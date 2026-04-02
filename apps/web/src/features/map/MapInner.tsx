@@ -22,6 +22,7 @@ const TAXI_STYLE = {
   weight: 1,
   fillOpacity: 0.9,
 };
+
 // Fix broken marker icons in Leaflet for Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
