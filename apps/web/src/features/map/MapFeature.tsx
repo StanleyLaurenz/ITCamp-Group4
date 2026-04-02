@@ -1,6 +1,6 @@
 "use client";
 
-import WeatherWidget from "@/components/weatherWidget";
+import WeatherWidget from "@/components/WeatherWidget";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";

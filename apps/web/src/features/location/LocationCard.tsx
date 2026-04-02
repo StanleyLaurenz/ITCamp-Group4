@@ -5,7 +5,7 @@ import { MapPin, Heart, Star, Map, Info } from "react-feather";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { DetailsPopup } from "./DetailsPopup";
+import { DetailsPopup } from "./DetailsPopUp";
 
 interface LocationCardProps {
   id: string;

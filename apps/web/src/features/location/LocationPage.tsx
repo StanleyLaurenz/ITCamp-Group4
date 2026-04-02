@@ -12,7 +12,7 @@ import { Filter } from "./Filter";
 import { Search } from "./Search";
 import { SavedSection } from "./SavedSection";
 import { BrowseSection } from "./BrowseSection";
-import { DetailsPopup } from "./DetailsPopup";
+import { DetailsPopup } from "./DetailsPopUp";
 
 export function LocationPage() {
   const searchParams = useSearchParams();
