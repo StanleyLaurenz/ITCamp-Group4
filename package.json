@@ -12,13 +12,6 @@
     "build": "npm run build --workspace @itcamp/web && npm run build --workspace @itcamp/api"
   },
   "devDependencies": {
-    "@types/nprogress": "^0.2.3",
     "concurrently": "^9.2.1"
-  },
-  "dependencies": {
-    "cors": "^2.8.6",
-    "leaflet.heat": "^0.2.0",
-    "nprogress": "^0.2.0",
-    "react-feather": "^2.0.10"
   }
 }

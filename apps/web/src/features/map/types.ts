@@ -15,9 +15,3 @@ export interface Taxi {
   lat: number;
   lng: number;
 }
-
-export type WeatherStation = {
-  lat: number;
-  lng: number;
-  value: number;
-};

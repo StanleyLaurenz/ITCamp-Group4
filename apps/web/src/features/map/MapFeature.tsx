@@ -1,10 +1,10 @@
 "use client";
 
-import WeatherWidget from "@/components/weatherWidget";
+import WeatherWidget from "@/components/WeatherWidget";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { MapPin, CloudRain, Heart } from "react-feather";
+import { MapPin, Heart } from "react-feather";
 import { getAttractions, getMRTStations, getTaxis } from "@/lib/api";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getCategories } from "@/utils/categorize";
@@ -12,7 +12,6 @@ import { getStaticRating } from "@/utils/generateRating";
 import { useAuth } from "@/context/AuthContext";
 import type { Landmark, Taxi } from "./types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-// import { calculateDistance } from "@/utils/distance";
 
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
 
@@ -32,9 +31,8 @@ export function MapFeature() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial data states
   const [landmarks, setLandmarks] = useState<Landmark[]>([]);
-  const [taxis, setTaxis] = useState<Taxi[]>([])
+  const [taxis, setTaxis] = useState<Taxi[]>([]);
   const [activeLines, setActiveLines] = useState<string[]>(
     Object.keys(MRT_COLORS)
   );
@@ -43,10 +41,8 @@ export function MapFeature() {
     lines: any[];
   } | null>(null);
 
-  // Layer States
   const [showLandmarks, setShowLandmarks] = useState(true);
   const [showTaxi, setShowTaxi] = useState(false);
-  const [showRain, setShowRain] = useState(false);
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [showMRT, setShowMRT] = useState(false);
   const [showFullMRTMap, setShowFullMRTMap] = useState(false);
@@ -58,7 +54,6 @@ export function MapFeature() {
     isLoggedIn
   );
 
-  // Fetches static data (Attraction and MRT) when the component mounts
   useEffect(() => {
     async function fetchAttractionAndMRTData() {
       setLoading(true);
@@ -67,11 +62,7 @@ export function MapFeature() {
           getAttractions(),
           getMRTStations(),
         ]);
-
-        // Flatten the data so LandmarkPopup gets exactly what it expects
-        // Inside MapFeature.tsx -> fetchAllMapData function
         const flattenedLandmarks = (attractionsData as any[]).map((item) => {
-          // 1. Get the numeric ID (this is the seed for your rating)
           const id = Number(item.properties?.OBJECTID_1);
           const coords = item.geometry?.coordinates || [0, 0];
 
@@ -83,18 +74,12 @@ export function MapFeature() {
             lat: coords[1],
             lng: coords[0],
             imageUrl: item.imageUrl,
-
-            // 2. GENERATE THE RATING (Same as Location Card)
             rating: getStaticRating(id),
-
-            // 3. GENERATE CATEGORIES (Same as Location Card)
             categories: getCategories(item),
-
             nearestMRT: item.nearestMRT || "",
           };
         });
 
-        // Feed markers with data
         setLandmarks(flattenedLandmarks);
         setMrtData(mrtDataResponse);
       } catch (err) {
@@ -114,25 +99,24 @@ export function MapFeature() {
     );
   };
 
-  // Fetches taxi data (dynamic)
   useEffect(() => {
-    if(!showTaxi) { // When taxi tracker is off
-      setTaxis([]); // Clears marked taxis (if any)
-      return; // No data fetching
+    if (!showTaxi) {
+      setTaxis([]);
+      return;
     }
 
-    const fetchTaxiData = async() => {
-      try { // Get taxi data and feed them to the markers
+    const fetchTaxiData = async () => {
+      try {
         const taxiData = await getTaxis();
         setTaxis(taxiData);
       } catch (err) {
         setError(`Failed to load taxi data - ${err}`);
       }
-    }
+    };
 
     fetchTaxiData();
-    const interval = setInterval(fetchTaxiData, 60000); // Updates markers every 1 minute
-    return () => clearInterval(interval) // returns a cleanup function (stops the timer)
+    const interval = setInterval(fetchTaxiData, 60000);
+    return () => clearInterval(interval);
   }, [showTaxi]);
 
   if (loading) {
@@ -154,7 +138,6 @@ export function MapFeature() {
         showLandmarks={showLandmarks}
         showTaxi={showTaxi}
         taxis={taxis}
-        showRain={showRain}
         showSavedOnly={showSavedOnly}
         showMRT={showMRT}
         mrtData={mrtData}
@@ -187,20 +170,6 @@ export function MapFeature() {
           >
             <span className="text-[11px] font-black uppercase tracking-wider">
               Taxi
-            </span>
-          </button>
-
-          <button
-            onClick={() => setShowRain(!showRain)}
-            className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
-              showRain
-                ? "bg-[#1572D3] text-white"
-                : "text-slate-500 hover:bg-slate-200/50"
-            }`}
-          >
-            <CloudRain size={18} />
-            <span className="text-[11px] font-black uppercase tracking-wider">
-              Rain
             </span>
           </button>
 

@@ -14,7 +14,6 @@ import {
 interface WeatherData {
   temp: number;
   humidity: number;
-  rainfall: number;
   windSpeed: number;
   windDir: number;
   condition: string;
@@ -30,7 +29,6 @@ export default function WeatherWidget() {
   const fetchWeather = async () => {
     setLoading(true);
     try {
-      // Fetching from internal Next.js route
       const res = await fetch("/weather");
       const data = await res.json();
       setWeather(data);
@@ -45,7 +43,6 @@ export default function WeatherWidget() {
     fetchWeather();
   }, []);
 
-  // 1. COLLAPSED STATE (Compact & Glassy)
   if (!isExpanded) {
     return (
       <button
@@ -57,7 +54,6 @@ export default function WeatherWidget() {
     );
   }
 
-  // 2. COMPACT SEMI-TRANSPARENT POP-UP
   return (
     <div className="absolute top-6 right-6 z-[999] w-[300px] bg-[#1e3a5f]/80 text-white rounded-[2rem] shadow-2xl backdrop-blur-xl border border-white/10 overflow-hidden animate-in fade-in zoom-in duration-300">
       {/* Header Section */}
@@ -126,7 +122,7 @@ export default function WeatherWidget() {
               </div>
 
               {/* Direction */}
-              <div className="flex flex-col p-3 bg-white/5 rounded-2xl border border-white/5">
+              <div className="col-span-2 flex flex-col p-3 bg-white/5 rounded-2xl border border-white/5">
                 <Navigation
                   size={16}
                   style={{ transform: `rotate(${weather?.windDir}deg)` }}
@@ -136,18 +132,6 @@ export default function WeatherWidget() {
                   Direction
                 </span>
                 <span className="text-sm font-bold">{weather?.windDir}°</span>
-              </div>
-
-              {/* Rainfall */}
-              <div className="flex flex-col p-3 bg-white/5 rounded-2xl border border-white/5">
-                <Cloud size={16} className="text-[#1572D3] mb-2" />
-                <span className="text-[8px] font-bold text-white/40 uppercase mb-0.5">
-                  Rain
-                </span>
-                <span className="text-sm font-bold">
-                  {weather?.rainfall}{" "}
-                  <span className="text-[10px] opacity-50 font-normal">mm</span>
-                </span>
               </div>
             </div>
 

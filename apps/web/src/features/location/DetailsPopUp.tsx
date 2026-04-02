@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation"; // Added for redirect
-import { useAuth } from "@/context/AuthContext"; // Added for auth check
+import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   X,
   Clock,
@@ -15,7 +15,7 @@ import {
 } from "react-feather";
 import Link from "next/link";
 
-interface DetailsPopUpProps {
+interface DetailsPopupProps {
   isOpen: boolean;
   onClose: () => void;
   data: any;
@@ -25,7 +25,7 @@ interface DetailsPopUpProps {
   rating: number;
 }
 
-export function DetailsPopUp({
+export function DetailsPopup({
   isOpen,
   onClose,
   data,
@@ -33,7 +33,7 @@ export function DetailsPopUp({
   onFavoriteToggle,
   imageUrl,
   rating,
-}: DetailsPopUpProps) {
+}: DetailsPopupProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
@@ -67,13 +67,11 @@ export function DetailsPopUp({
     imageUrl ||
     "https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600";
 
-  // Auth Guard for Favorite Toggle
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!user) {
-      // Encode current path to return here after login
       const returnUrl = encodeURIComponent(pathname);
       router.push(`/login?returnTo=${returnUrl}`);
       return;

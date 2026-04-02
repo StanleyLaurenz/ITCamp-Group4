@@ -3,15 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { Heart, Map, ArrowLeft } from "react-feather";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Added for redirect
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getAttractions } from "@/lib/api";
 import { LocationCard } from "@/features/location/LocationCard";
 import { getCategories } from "@/utils/categorize";
-import Navbar from "@/components/Navbar"; // Ensure this path is correct
+import Navbar from "@/components/Navbar";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { calculateDistance } from "@/utils/distance";
 import { getStaticRating } from "@/utils/generateRating";
 
 export default function SavedPage() {
@@ -27,29 +26,24 @@ export default function SavedPage() {
   const [attractions, setAttractions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!authLoading && !isLoggedIn) {
       router.push("/login?returnTo=/saved");
     }
   }, [isLoggedIn, authLoading, router]);
 
-  // Inside SavedPage() component
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
       try {
         const data = await getAttractions();
 
-        // Flatten the data immediately so it matches your other pages
         const flattened = (data || []).map((item: any) => {
           const id = Number(item.properties?.OBJECTID_1);
           return {
             ...item,
-            id: id,
-            // Generate the static rating here
+            id,
             rating: getStaticRating(id),
-            // Generate categories here
             categories: getCategories(item),
           };
         });
@@ -149,7 +143,7 @@ export default function SavedPage() {
                   onFavoriteToggle={() =>
                     toggleSave(Number(item.properties.OBJECTID_1))
                   }
-                  item={item} // This now contains the 'nearestMRT' property
+                  item={item}
                 />
               ))}
             </div>
@@ -180,4 +174,3 @@ export default function SavedPage() {
     </div>
   );
 }
-

@@ -11,7 +11,7 @@ import {
 } from "react-leaflet";
 import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
-import type { Landmark, WeatherStation, Taxi } from "./types";
+import type { Landmark, Taxi } from "./types";
 import { Popup, useMap } from "react-leaflet";
 
 const MRT_COLORS: Record<string, string> = {
@@ -153,7 +153,6 @@ interface MapInnerProps {
   isLoggedIn: boolean;
   showLandmarks: boolean;
   showTaxi: boolean;
-  showRain: boolean;
   taxis: Taxi[];
   showSavedOnly: boolean;
   initialSelectedId: number | null;
@@ -205,7 +204,6 @@ export default function MapInner({
   showLandmarks,
   showTaxi,
   taxis,
-  showRain: _showRain, // destructured cause it's not used inside the function yet
   showSavedOnly,
   showMRT,
   mrtData,
@@ -215,7 +213,6 @@ export default function MapInner({
     initialSelectedId
   );
   const [currentZoom, setCurrentZoom] = useState(12); // Default zoom level
-  const [weatherData, setWeatherData] = useState<WeatherStation[]>([]);
 
   const handleClose = () => {
     setSelectedId(null);
