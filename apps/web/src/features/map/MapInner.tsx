@@ -7,12 +7,20 @@ import {
   TileLayer,
   Marker,
   useMapEvents,
-  Circle,
+  CircleMarker,
 } from "react-leaflet";
 import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
 import type { Landmark, WeatherStation, Taxi } from "./types";
 import { Popup, useMap } from "react-leaflet";
+
+const TAXI_STYLE = {
+  radius: 4,
+  fillColor: "#facc15", // Bright Yellow (Tailwind yellow-400)
+  color: "#a16207", // Dark Yellow border (Tailwind yellow-900)
+  weight: 1,
+  fillOpacity: 0.9,
+};
 
 const MRT_COLORS: Record<string, string> = {
   "NORTH-SOUTH LINE": "#D42E12",
@@ -241,22 +249,27 @@ export default function MapInner({
         <MapClickHandler onClose={() => setSelectedId(null)} />
 
         {/* --- TAXI LAYER --- */}
-        {showTaxi &&              //Activates when the taxi button is on,
-          Array.isArray(taxis) && //if taxis is an array.
-          taxis.map((taxi, i) =>  //Maps each taxi to a Circle.
-            <Circle
-              key={i} // index for element tracking
-              center={[taxi.lat, taxi.lng]} // taxi coordinates
-              radius={3} // in metres
-              pathOptions={{ //Blue circle w/ red outline
-                color: 'red',
-                weight: 2,
-                opacity: 0.6,
-                fillColor: 'blue',
-                fillOpacity: 0.75
-              }}
-            />
-          )}
+        {/* --- TAXI LAYER --- */}
+        {/* --- OPTIMIZED TAXI LAYER --- */}
+        {showTaxi &&
+          Array.isArray(taxis) &&
+          taxis.map((taxi, i) => (
+            <CircleMarker
+              key={`taxi-${i}`}
+              center={[taxi.lat, taxi.lng]}
+              {...TAXI_STYLE}
+              // CircleMarker is canvas-based, which is way smoother than Markers
+            >
+              <Popup className="taxi-popup">
+                <div className="flex items-center gap-2 p-1">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                  <span className="text-[10px] font-bold uppercase text-slate-700">
+                    Taxi Available
+                  </span>
+                </div>
+              </Popup>
+            </CircleMarker>
+          ))}
 
         {/* --- MRT LAYER --- */}
         {showMRT &&
