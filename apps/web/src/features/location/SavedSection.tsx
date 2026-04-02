@@ -4,11 +4,11 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Heart } from "react-feather";
 import { LocationCard } from "./LocationCard";
-import { getCategories } from "../../utils/categorize";
+import type { EnrichedAttraction } from "@/lib/attractionData";
 
 interface SavedSectionProps {
   isLoggedIn: boolean;
-  savedLocations: any[];
+  savedLocations: EnrichedAttraction[];
   searchQuery: string;
   toggleSave: (id: number) => void;
 }
@@ -115,21 +115,21 @@ export function SavedSection({
           className="flex justify-center flex-row w-full gap-4 sm:gap-6 overflow-x-auto pb-8 no-scrollbar scroll-smooth snap-x snap-mandatory sm:justify-start"
         >
           {savedLocations.map((item) => {
-            const id = Number(item["properties"]["OBJECTID_1"]);
-            const dynamicCategory = getCategories(item);
+            const id = item.id;
+            const dynamicCategory = item.categories;
             return (
               <div
                 key={`saved-wrapper-${id}`}
                 className="shrink-0 w-[320px] sm:w-[280px] snap-center sm:snap-start"
               >
                 <LocationCard
-                  id={id.toString()}
+                  id={String(id)}
                   item={item}
-                  title={item["properties"]["PAGETITLE"]}
+                  title={String(item.properties?.PAGETITLE ?? "")}
                   rating={item.rating}
-                  mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
+                  mrtLocation={String(item.properties?.ADDRESS ?? "Singapore")}
                   categories={dynamicCategory}
-                  imageUrl={item["imageUrl"]}
+                  imageUrl={item.imageUrl ?? undefined}
                   isFavorite={true}
                   onFavoriteToggle={() => toggleSave(id)}
                 />

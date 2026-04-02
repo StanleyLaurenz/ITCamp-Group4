@@ -2,15 +2,14 @@
 
 import React from "react";
 import { LocationCard } from "./LocationCard";
-import { getCategories } from "../../utils/categorize";
-import { getStaticRating } from "../../utils/generateRating";
+import type { EnrichedAttraction } from "@/lib/attractionData";
 import { Map } from "react-feather"; // Import Map icon
 import Link from "next/link"; // Import Link
 
 interface BrowseSectionProps {
   loading: boolean;
   searchQuery: string;
-  filteredAttractions: any[];
+  filteredAttractions: EnrichedAttraction[];
   visibleCount: number;
   savedIds: number[];
   toggleSave: (id: number) => void;
@@ -66,20 +65,20 @@ export function BrowseSection({
               </div>
             ))
           : filteredAttractions.slice(0, visibleCount).map((item) => {
-              const id = Number(item["properties"]["OBJECTID_1"]);
-              const dynamicCategory = getCategories(item);
-              const rating = getStaticRating(id);
+              const id = item.id;
+              const dynamicCategory = item.categories;
+              const rating = item.rating;
 
               return (
                 <LocationCard
                   key={id}
-                  id={id.toString()}
+                  id={String(id)}
                   item={item}
-                  title={item["properties"]["PAGETITLE"]}
+                  title={String(item.properties?.PAGETITLE ?? "")}
                   rating={rating}
-                  mrtLocation={item["properties"]["ADDRESS"] || "Singapore"}
+                  mrtLocation={String(item.properties?.ADDRESS ?? "Singapore")}
                   categories={dynamicCategory}
-                  imageUrl={item["imageUrl"]}
+                  imageUrl={item.imageUrl ?? undefined}
                   isFavorite={savedIds.includes(id)}
                   onFavoriteToggle={() => toggleSave(id)}
                 />

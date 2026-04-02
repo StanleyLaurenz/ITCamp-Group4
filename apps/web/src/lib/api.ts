@@ -1,53 +1,53 @@
+import type { MrtStationMarker } from "@/features/map/types";
+import type { AttractionRecord } from "./attractionData";
+
 interface HealthResponse {
   status: string;
 }
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+const DEFAULT_API_BASE = "http://localhost:3001";
 
-function getApiBaseUrl(): string {
-  const baseUrl = "http://localhost:3001"; // Ensure no trailing slash
-  return baseUrl;
+export function getApiBaseUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  if (raw) {
+    return raw.replace(/\/$/, "");
+  }
+  return DEFAULT_API_BASE;
 }
 
-export async function getMRTStations() {
-  // Use the same helper as getAttractions to ensure the URL is identical
-  const response = await fetch(`${getApiBaseUrl()}/api/mrt`);
+async function apiJson<T>(path: string, errorMessage: string): Promise<T> {
+  const response = await fetch(`${getApiBaseUrl()}${path}`);
 
   if (!response.ok) {
-    console.error("MRT Fetch failed with status:", response.status);
+    throw new Error(`${errorMessage}: HTTP ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+export async function getMRTStations(): Promise<MrtStationMarker[]> {
+  try {
+    return await apiJson<MrtStationMarker[]>("/api/mrt", "MRT fetch failed");
+  } catch (e) {
+    console.error(e);
     return [];
   }
-  return response.json();
 }
 
 export async function getHealth(): Promise<HealthResponse> {
-  const response = await fetch(`${getApiBaseUrl()}/api/health`);
-
-  if (!response.ok) {
-    throw new Error(`Backend returned HTTP ${response.status}`);
-  }
-
-  return response.json() as Promise<HealthResponse>;
+  return apiJson<HealthResponse>("/api/health", "Backend health check failed");
 }
 
-export async function getAttractions() {
-  // Ensure the path passed here starts with a slash
-  const response = await fetch(`${getApiBaseUrl()}/api/attractions`);
-
-  if (!response.ok) {
-    throw new Error(`Failed to load attractions: ${response.status}`);
-  }
-
-  return response.json();
+export async function getAttractions(): Promise<AttractionRecord[]> {
+  return apiJson<AttractionRecord[]>(
+    "/api/attractions",
+    "Failed to load attractions"
+  );
 }
 
 export async function getWeather() {
-  const response = await fetch(`${getApiBaseUrl()}/api/weather`);
-
-  if (!response.ok) {
-    throw new Error(`Failed to load weather data: ${response.status}`);
-  }
-
-  return response.json();
+  return apiJson<Record<string, unknown>>(
+    "/api/weather",
+    "Failed to load weather data"
+  );
 }

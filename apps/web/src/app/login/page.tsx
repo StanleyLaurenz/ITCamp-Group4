@@ -1,16 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
+import { useRouter, useSearchParams } from "next/navigation";
+import { AuthPageLayout } from "@/components/auth/AuthPageLayout";
 import { supabase } from "@/lib/supabase";
-import { useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // 2. Moved to TOP LEVEL
+  const searchParams = useSearchParams();
 
   const [mode, setMode] = useState<"login" | "reset">("login");
   const [email, setEmail] = useState("");
@@ -19,7 +18,6 @@ export default function LoginPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 3. Get the returnTo value here so it's ready when the form submits
   const returnTo = searchParams.get("returnTo") || "/";
   const resetSuccess = searchParams.get("reset") === "success";
 
@@ -36,9 +34,8 @@ export default function LoginPage() {
 
     if (error) {
       setError(error.message);
-      setLoading(false); // Make sure to stop loading on error
+      setLoading(false);
     } else {
-      // 4. Now this variable is safely accessible and correct
       router.push(returnTo);
     }
   };
@@ -76,10 +73,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="flex items-center justify-center py-20 px-4">
-        <div className="bg-white rounded-lg shadow-md w-full max-w-sm p-8">
+    <AuthPageLayout>
           <h1 className="text-center text-lg font-semibold text-gray-800 mb-6">
             {mode === "login" ? "Login Form" : "Reset Password"}
           </h1>
@@ -217,8 +211,20 @@ export default function LoginPage() {
               reset link.
             </p>
           )}
-        </div>
-      </div>
-    </div>
+    </AuthPageLayout>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <AuthPageLayout>
+          <p className="text-center text-sm text-gray-500">Loading…</p>
+        </AuthPageLayout>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

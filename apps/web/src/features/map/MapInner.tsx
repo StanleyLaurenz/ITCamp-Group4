@@ -11,20 +11,9 @@ import {
 } from "react-leaflet";
 import { useState, useEffect } from "react";
 import LandmarkPopup from "./LandmarkPopup";
-import type { Landmark, WeatherStation } from "./types";
+import { MRT_LINE_COLORS } from "./mrtLineColors";
+import type { Landmark, MrtStationMarker, WeatherStation } from "./types";
 import { Popup, useMap } from "react-leaflet";
-
-const MRT_COLORS: Record<string, string> = {
-  "NORTH-SOUTH LINE": "#D42E12",
-  "EAST-WEST LINE": "#009543",
-  "NORTH-EAST LINE": "#8F4199",
-  "CIRCLE LINE": "#FFA400",
-  "DOWNTOWN LINE": "#005BA4",
-  "THOMSON-EAST COAST LINE": "#9D5B25",
-  "BUKIT PANJANG LRT": "#748477",
-  "SENGKANG LRT": "#748477",
-  "PUNGGOL LRT": "#748477",
-};
 
 // Fix broken marker icons in Leaflet for Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -35,11 +24,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const createMRTIcon = (stationLines: string[], currentZoom: number) => {
-  const colors = stationLines.map((line) => MRT_COLORS[line] || "#748477");
+// apps/web/src/features/map/MapInner.tsx
 
-  // Dynamic Sizing based on Zoom
-  // Zoom 12 (Default) = 24px, Zoom 10 (Out) = 12px, Zoom 15 (In) = 32px
+const createMRTIcon = (stationLines: string[], currentZoom: number) => {
+  const colors = stationLines.map((line) => MRT_LINE_COLORS[line] || "#748477");
+
   const baseSize = currentZoom < 12 ? 12 : currentZoom > 14 ? 32 : 24;
   const innerSize = baseSize * 0.6;
   const iconOffset = baseSize / 2;
@@ -61,6 +50,7 @@ const createMRTIcon = (stationLines: string[], currentZoom: number) => {
     html: `
       <div class="relative flex items-center justify-center transition-all duration-300" 
            style="width: ${baseSize}px; height: ${baseSize}px;">
+        
         <div class="absolute w-full h-full rounded-[4px] rotate-45 shadow-sm border border-white/30" 
              style="${backgroundStyle}">
         </div>
@@ -68,16 +58,16 @@ const createMRTIcon = (stationLines: string[], currentZoom: number) => {
         ${
           currentZoom > 11
             ? `
-          <div class="absolute bg-white rounded-full flex items-center justify-center z-10 shadow-inner"
+          <div class="absolute bg-slate-50 rounded-full flex items-center justify-center z-10 shadow-inner"
                style="width: ${innerSize}px; height: ${innerSize}px;">
-             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-slate-800">
-             <path d="M7 15h10" />
-             <path d="M12 15V5" />
-             <path d="M7 11h10" />
-             <rect x="3" y="5" width="18" height="15" rx="2" />
-             <path d="m8 21-2-2" />
-             <path d="m16 21 2-2" />
-           </svg>
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1572D3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M7 15h10" />
+               <path d="M12 15V5" />
+               <path d="M7 11h10" />
+               <rect x="3" y="5" width="18" height="15" rx="2" />
+               <path d="m8 21-2-2" />
+               <path d="m16 21 2-2" />
+             </svg>
           </div>
         `
             : ""
@@ -156,7 +146,7 @@ interface MapInnerProps {
   showSavedOnly: boolean;
   initialSelectedId: number | null;
   showMRT: boolean;
-  mrtData: { stations: any[]; lines: any[] } | null;
+  mrtData: MrtStationMarker[] | null;
   activeLines: string[]; // ADD THIS
 }
 
@@ -242,10 +232,10 @@ export default function MapInner({
         {showMRT &&
           Array.isArray(mrtData) &&
           mrtData
-            .filter((st) =>
+            .filter((st: MrtStationMarker) =>
               st.lines.some((l: string) => activeLines.includes(l))
             )
-            .map((st, i) => (
+            .map((st: MrtStationMarker, i: number) => (
               <Marker
                 key={`mrt-${st.name}-${i}`} // Use station name for a more unique key
                 position={st.position} // Uses the 'position' key [lat, lng] from your backend
@@ -288,7 +278,7 @@ export default function MapInner({
                             key={line}
                             className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[9px] font-black text-white shadow-sm transition-transform hover:scale-105"
                             style={{
-                              backgroundColor: MRT_COLORS[line] || "#748477",
+                              backgroundColor: MRT_LINE_COLORS[line] || "#748477",
                             }}
                           >
                             <div className="w-1.5 h-1.5 rounded-full bg-white/40" />

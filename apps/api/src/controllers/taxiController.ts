@@ -1,44 +1,32 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export const getTaxis = async (
-    req: Request, 
-    res: Response, 
-    next: NextFunction
+  _req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
-    try {
-        // get current time in UTC and convert to SGT
-        const SGT = new Date(Date.now() + 8 * 3600 * 1000);
-        // change into ISO time format
-        const formattedTime = SGT.toISOString().slice(0,19);
+  try {
+    const sgt = new Date(Date.now() + 8 * 3600 * 1000);
+    const formattedTime = sgt.toISOString().slice(0, 19);
 
-        // Build the API's URL
-        const apiURL = `https://api.data.gov.sg/v1/transport/taxi-availability?date_time=${encodeURIComponent(formattedTime)}`;
-        
-        // Fetch data from the API (will be in string format)
-        const response = await fetch(apiURL);
-        
-        // Convert data into JSON format
-        const data = await response.json();
-        // Only take 'features' from data
-        const features = data.features[0];
-        // Take the metadata
-        const meta = features.properties;
-        // Take the taxi coordinates [lng, lat]
-        const taxis = features.geometry.coordinates;
-        
-        // Convert taxi coordinates into a more leaflet-friendly format [lat, lng]
-        const coords = taxis.map(
-            ([lng, lat]: [number, number]) => ({lat, lng})
-        );
-        
-        // Build final output
-        const result = {meta, coords}
+    const apiURL = `https://api.data.gov.sg/v1/transport/taxi-availability?date_time=${encodeURIComponent(formattedTime)}`;
 
-        // return result to frontend in JSON format
-        res.json(result);
+    const response = await fetch(apiURL);
+    const data = (await response.json()) as {
+      features: Array<{
+        properties: Record<string, unknown>;
+        geometry: { coordinates: [number, number][] };
+      }>;
+    };
 
-    } catch (error) {
-        // throws any caught error to the errorHandler
-        next(error);
-    }
-}
+    const features = data.features[0];
+    const meta = features.properties;
+    const taxis = features.geometry.coordinates;
+
+    const coords = taxis.map(([lng, lat]: [number, number]) => ({ lat, lng }));
+
+    res.json({ meta, coords });
+  } catch (error) {
+    next(error);
+  }
+};

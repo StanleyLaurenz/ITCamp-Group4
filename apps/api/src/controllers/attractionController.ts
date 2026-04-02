@@ -4,6 +4,9 @@ import type {
   Response as ExpressResponse,
 } from "express";
 
+import { fetchOpenDatasetDownloadUrl } from "../lib/dataGovOpen.js";
+import { calculateDistance } from "../utils/distance.js";
+import { safeJsonParse } from "../utils/json.js";
 import { loadMrtStations } from "./mrtController.js";
 
 type AttractionFeature = {
@@ -15,12 +18,6 @@ type AttractionFeature = {
     [key: string]: unknown;
   };
   [key: string]: unknown;
-};
-
-type PollDownloadResponse = {
-  data?: {
-    url?: string;
-  };
 };
 
 type GeoJsonResponse = {
@@ -38,25 +35,6 @@ type PexelsResponse = {
 const DATASET_ID = "d_0f2f47515425404e6c9d2a040dd87354";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
-function calculateDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-) {
-  const R = 6371; // Radius of the earth in km
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
 let attractionsCache: {
   expiresAt: number;
   data: Array<AttractionFeature & { imageUrl: string | null }>;
@@ -66,44 +44,11 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
-async function safeJsonParse<T>(
-  response: globalThis.Response,
-  context: string
-): Promise<T> {
-  try {
-    return (await response.json()) as T;
-  } catch {
-    throw new Error(`${context} returned invalid JSON`);
-  }
-}
-
-async function fetchDatasetDownloadUrl() {
-  const pollUrl = `https://api-open.data.gov.sg/v1/public/api/datasets/${DATASET_ID}/poll-download`;
-  const pollResponse = await fetch(pollUrl);
-
-  if (!pollResponse.ok) {
-    throw new Error(
-      `Data.gov poll-download failed with HTTP ${pollResponse.status}`
-    );
-  }
-
-  const pollJson = await safeJsonParse<PollDownloadResponse>(
-    pollResponse,
-    "Data.gov poll-download"
-  );
-  const downloadUrl = pollJson.data?.url;
-
-  if (!isNonEmptyString(downloadUrl)) {
-    throw new Error(
-      "Data.gov poll-download did not include a usable download URL"
-    );
-  }
-
-  return downloadUrl;
-}
-
 async function fetchBaseAttractions() {
-  const downloadUrl = await fetchDatasetDownloadUrl();
+  const downloadUrl = await fetchOpenDatasetDownloadUrl(
+    DATASET_ID,
+    "Data.gov attractions"
+  );
   const dataResponse = await fetch(downloadUrl);
 
   if (!dataResponse.ok) {
@@ -204,7 +149,6 @@ async function loadAttractions() {
   if (attractionsCache && attractionsCache.expiresAt > now)
     return attractionsCache.data;
 
-  // Fetch both in parallel
   const [features, stations] = await Promise.all([
     fetchBaseAttractions(),
     loadMrtStations(),
@@ -212,7 +156,6 @@ async function loadAttractions() {
 
   const enrichedWithImages = await enrichAttractionsWithImages(features);
 
-  // SERVER-SIDE MATH
   const finalEnriched = enrichedWithImages.map((attr) => {
     const [lng, lat] = attr.geometry?.coordinates as [number, number];
     let nearest = { name: "Unknown", distance: Infinity };

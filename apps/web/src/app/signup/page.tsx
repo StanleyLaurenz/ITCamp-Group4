@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import Navbar from '@/components/Navbar'
+import { AuthPageLayout } from '@/components/auth/AuthPageLayout'
 import { supabase } from '@/lib/supabase'
 
 export default function SignupPage() {
@@ -46,10 +46,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="flex items-center justify-center py-20 px-4">
-        <div className="bg-white rounded-lg shadow-md w-full max-w-sm p-8">
+    <AuthPageLayout>
           <h1 className="text-center text-lg font-semibold text-gray-800 mb-6">Sign Up</h1>
 
           {error && (
@@ -168,8 +165,6 @@ export default function SignupPage() {
               Sign In
             </Link>
           </p>
-        </div>
-      </div>
-    </div>
+    </AuthPageLayout>
   )
 }

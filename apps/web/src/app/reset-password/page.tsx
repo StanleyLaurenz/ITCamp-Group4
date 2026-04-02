@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
+import { AuthPageLayout } from "@/components/auth/AuthPageLayout";
 import { supabase } from "@/lib/supabase";
 
 export default function ResetPasswordPage() {
@@ -133,10 +133,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="flex items-center justify-center py-20 px-4">
-        <div className="bg-white rounded-lg shadow-md w-full max-w-sm p-8">
+    <AuthPageLayout>
           <h1 className="text-center text-lg font-semibold text-gray-800 mb-6">
             Set New Password
           </h1>
@@ -184,8 +181,6 @@ export default function ResetPasswordPage() {
               {loading ? "Updating password…" : "Update password"}
             </button>
           </form>
-        </div>
-      </div>
-    </div>
+    </AuthPageLayout>
   );
 }

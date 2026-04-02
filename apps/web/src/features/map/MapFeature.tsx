@@ -4,26 +4,19 @@ import WeatherWidget from "@/components/weatherWidget";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { MapPin, CloudRain, Heart } from "react-feather";
+import { MapPin, Heart } from "react-feather";
 import { getAttractions, getMRTStations } from "@/lib/api";
+import { rawAttractionToLandmark } from "@/lib/attractionData";
 import { useSavedLocations } from "@/lib/useSavedLocations";
-import { getCategories } from "@/utils/categorize";
-import { getStaticRating } from "@/utils/generateRating";
 import { useAuth } from "@/context/AuthContext";
-import type { Landmark } from "./types";
+import type { Landmark, MrtStationMarker } from "./types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { calculateDistance } from "@/utils/distance";
+import {
+  MRT_FILTER_LINE_ORDER,
+  MRT_LINE_COLORS,
+} from "./mrtLineColors";
 
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
-
-const MRT_COLORS: Record<string, string> = {
-  "NORTH-SOUTH LINE": "#D42E12",
-  "EAST-WEST LINE": "#009543",
-  "NORTH-EAST LINE": "#8F4199",
-  "CIRCLE LINE": "#FFA400",
-  "DOWNTOWN LINE": "#005BA4",
-  "THOMSON-EAST COAST LINE": "#9D5B25",
-};
 
 export function MapFeature() {
   const searchParams = useSearchParams();
@@ -31,22 +24,17 @@ export function MapFeature() {
 
   const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showFullMRTMap, setShowFullMRTMap] = useState(false);
 
-  // Layer States
   const [showLandmarks, setShowLandmarks] = useState(true);
   const [showTaxi, setShowTaxi] = useState(false);
   const [showRain, setShowRain] = useState(false);
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const [showMRT, setShowMRT] = useState(false);
-  const [activeLines, setActiveLines] = useState<string[]>(
-    Object.keys(MRT_COLORS)
-  );
-  const [mrtData, setMrtData] = useState<{
-    stations: any[];
-    lines: any[];
-  } | null>(null);
+  const [activeLines, setActiveLines] = useState<string[]>(() => [
+    ...MRT_FILTER_LINE_ORDER,
+  ]);
+  const [mrtData, setMrtData] = useState<MrtStationMarker[] | null>(null);
 
   const { user } = useAuth();
   const isLoggedIn = !!user;
@@ -55,50 +43,24 @@ export function MapFeature() {
     isLoggedIn
   );
 
-  // Inside MapFeature.tsx -> fetchAllData function
   useEffect(() => {
     async function fetchAllMapData() {
       setLoading(true);
       try {
-        const [attractionsData, mrtDataResponse] = await Promise.all([
+        const [attractionsData, mrtStations] = await Promise.all([
           getAttractions(),
           getMRTStations(),
         ]);
 
-        console.log(attractionsData);
-
-        // Flatten the data so LandmarkPopup gets exactly what it expects
-        // Inside MapFeature.tsx -> fetchAllMapData function
-        const flattenedLandmarks = (attractionsData as any[]).map((item) => {
-          // 1. Get the numeric ID (this is the seed for your rating)
-          const id = Number(item.properties?.OBJECTID_1);
-          const coords = item.geometry?.coordinates || [0, 0];
-
-          return {
-            ...item,
-            id: id,
-            title: item.properties?.PAGETITLE || "Unknown",
-            address: item.properties?.ADDRESS || "Singapore",
-            lat: coords[1],
-            lng: coords[0],
-            imageUrl: item.imageUrl,
-
-            // 2. GENERATE THE RATING (Same as Location Card)
-            rating: getStaticRating(id),
-
-            // 3. GENERATE CATEGORIES (Same as Location Card)
-            categories: getCategories(item),
-
-            nearestMRT: item.nearestMRT || "",
-          };
-        });
+        const list = Array.isArray(attractionsData) ? attractionsData : [];
+        const flattenedLandmarks = list.map((item) =>
+          rawAttractionToLandmark(item)
+        );
 
         setLandmarks(flattenedLandmarks);
-
-        setLandmarks(flattenedLandmarks);
-        setMrtData(mrtDataResponse);
-      } catch (err) {
-        setError("Failed to load map data.");
+        setMrtData(mrtStations);
+      } catch {
+        // Same as before: load failure leaves landmarks empty after loading ends
       } finally {
         setLoading(false);
       }
@@ -141,7 +103,6 @@ export function MapFeature() {
 
       <WeatherWidget />
 
-      {/* Main Filter Bar */}
       <div className="absolute left-1/2 -translate-x-1/2 top-6 z-[500] flex flex-col items-center gap-3 w-fit max-w-[95vw]">
         <div className="flex items-center gap-1.5 rounded-[28px] border border-white/40 bg-white/80 p-1.5 shadow-2xl backdrop-blur-2xl">
           <button
@@ -155,6 +116,7 @@ export function MapFeature() {
             <MapPin size={18} />
             <span className="text-[11px] font-black uppercase">Landmarks</span>
           </button>
+
           <button
             onClick={() => setShowTaxi(!showTaxi)}
             className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
@@ -165,20 +127,6 @@ export function MapFeature() {
           >
             <span className="text-[11px] font-black uppercase tracking-wider">
               Taxi
-            </span>
-          </button>
-
-          <button
-            onClick={() => setShowRain(!showRain)}
-            className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 ${
-              showRain
-                ? "bg-[#1572D3] text-white"
-                : "text-slate-500 hover:bg-slate-200/50"
-            }`}
-          >
-            <CloudRain size={18} />
-            <span className="text-[11px] font-black uppercase tracking-wider">
-              Rain
             </span>
           </button>
 
@@ -196,17 +144,18 @@ export function MapFeature() {
               Saved
             </span>
           </button>
+
           <button
             onClick={() => setShowMRT(!showMRT)}
             className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 border ${
               showMRT
-                ? "bg-emerald-600 text-white border-emerald-700"
+                ? "bg-[#1572D3] text-white border-[#1572D3]"
                 : "text-slate-500 border-transparent hover:bg-slate-200/50"
             }`}
           >
             <div
               className={`w-2 h-2 rounded-full ${
-                showMRT ? "bg-white animate-pulse" : "bg-emerald-500"
+                showMRT ? "bg-white animate-pulse" : "bg-[#1572D3]"
               }`}
             />
             <span className="text-[11px] font-black uppercase tracking-wider">
@@ -215,10 +164,9 @@ export function MapFeature() {
           </button>
         </div>
 
-        {/* Sub-menu for MRT Lines */}
         {showMRT && (
           <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-[20px] bg-white/90 p-1.5 shadow-xl backdrop-blur-md border border-slate-100 animate-in fade-in slide-in-from-top-2">
-            {Object.entries(MRT_COLORS).map(([lineName, color]) => (
+            {MRT_FILTER_LINE_ORDER.map((lineName) => (
               <button
                 key={lineName}
                 onClick={() => toggleMRTLine(lineName)}
@@ -230,7 +178,9 @@ export function MapFeature() {
               >
                 <div
                   className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: color }}
+                  style={{
+                    backgroundColor: MRT_LINE_COLORS[lineName],
+                  }}
                 />
                 {lineName.replace(" LINE", "")}
               </button>
@@ -250,7 +200,6 @@ export function MapFeature() {
         )}
       </div>
 
-      {/* Full MRT Map Modal */}
       {showFullMRTMap && (
         <div
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4"

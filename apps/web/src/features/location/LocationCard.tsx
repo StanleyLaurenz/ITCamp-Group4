@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { MapPin, Heart, Star, Map, Info } from "react-feather";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter, usePathname } from "next/navigation";
+import { CATEGORY_CHIP_STYLES } from "@/constants/categoryStyles";
+import { useFavoriteWithAuth } from "@/hooks/useFavoriteWithAuth";
+import type { EnrichedAttraction } from "@/lib/attractionData";
 import { DetailsPopUp } from "./DetailsPopUp";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
 
 interface LocationCardProps {
   id: string;
@@ -17,7 +18,7 @@ interface LocationCardProps {
   categories: string[];
   isFavorite: boolean;
   onFavoriteToggle: () => void;
-  item: any;
+  item: EnrichedAttraction;
 }
 
 export function LocationCard({
@@ -37,34 +38,7 @@ export function LocationCard({
     imageUrl ||
     "https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600";
 
-  const categoryStyles: Record<string, string> = {
-    "Arts & Museum": "bg-purple-500/10 text-purple-300 border-purple-500/20",
-    "Culture & Heritage": "bg-amber-500/10 text-amber-300 border-amber-500/20",
-    "Nature & Parks":
-      "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-    Architecture: "bg-blue-500/10 text-blue-300 border-blue-500/20",
-    Lifestyle: "bg-pink-500/10 text-pink-300 border-pink-500/20",
-    Landmark: "bg-slate-500/10 text-slate-300 border-slate-500/20",
-  };
-
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user } = useAuth(); // Get user status
-
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user) {
-      // If not logged in, redirect to login with a return path
-      const returnUrl = encodeURIComponent(pathname);
-      router.push(`/login?returnTo=${returnUrl}`);
-      return;
-    }
-
-    // If logged in, proceed with the toggle
-    onFavoriteToggle();
-  };
+  const { handleFavoriteClick } = useFavoriteWithAuth(onFavoriteToggle);
 
   return (
     <div className="group relative w-full max-w-[320px] mx-auto h-[420px] rounded-[32px] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl cursor-pointer">
@@ -160,7 +134,7 @@ export function LocationCard({
             <span
               key={cat}
               className={`px-2 py-0.5 rounded-full text-[8px] font-black tracking-widest uppercase border backdrop-blur-md ${
-                categoryStyles[cat] || categoryStyles["Landmark"]
+                CATEGORY_CHIP_STYLES[cat] || CATEGORY_CHIP_STYLES["Landmark"]
               }`}
             >
               {cat}

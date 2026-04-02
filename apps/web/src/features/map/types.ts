@@ -16,3 +16,10 @@ export type WeatherStation = {
   lng: number;
   value: number;
 };
+
+/** MRT API payload item used on the map layer. */
+export type MrtStationMarker = {
+  name: string;
+  position: [number, number];
+  lines: string[];
+};

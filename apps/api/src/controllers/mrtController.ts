@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 
-// --- TYPES ---
+import { fetchOpenDatasetDownloadUrl } from "../lib/dataGovOpen.js";
+import { safeJsonParse } from "../utils/json.js";
+
 type MrtFeature = {
   geometry: {
     coordinates: [number, number];
@@ -14,12 +16,6 @@ export type MrtStation = {
   name: string;
   position: [number, number];
   lines: string[];
-};
-
-type PollDownloadResponse = {
-  code: number;
-  data?: { url?: string };
-  errMsg?: string;
 };
 
 // --- CONFIG ---
@@ -167,25 +163,19 @@ const STATION_LINE_MAP: Record<string, string[]> = {
   "GARDENS BY THE BAY": ["THOMSON-EAST COAST LINE"],
 };
 
-async function fetchMrtDownloadUrl() {
-  const pollUrl = `https://api-open.data.gov.sg/v1/public/api/datasets/${MRT_EXITS_ID}/poll-download`;
-  const response = await fetch(pollUrl);
-  const json = (await response.json()) as PollDownloadResponse;
-
-  if (json.code !== 0 || !json.data?.url) {
-    throw new Error(json.errMsg || "Failed to get MRT download URL");
-  }
-
-  return json.data.url;
-}
-
 async function fetchBaseMrtData(): Promise<MrtFeature[]> {
-  const downloadUrl = await fetchMrtDownloadUrl();
+  const downloadUrl = await fetchOpenDatasetDownloadUrl(
+    MRT_EXITS_ID,
+    "Data.gov MRT"
+  );
   const response = await fetch(downloadUrl);
 
   if (!response.ok) throw new Error("Failed to download MRT GeoJSON");
 
-  const geoJson = await response.json();
+  const geoJson = await safeJsonParse<{ features?: MrtFeature[] }>(
+    response,
+    "Data.gov MRT GeoJSON"
+  );
   return geoJson.features || [];
 }
 

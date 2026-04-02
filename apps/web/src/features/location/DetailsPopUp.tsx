@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation"; // Added for redirect
-import { useAuth } from "@/context/AuthContext"; // Added for auth check
+import { useFavoriteWithAuth } from "@/hooks/useFavoriteWithAuth";
+import type { EnrichedAttraction } from "@/lib/attractionData";
 import {
   X,
   Clock,
@@ -15,10 +15,21 @@ import {
 } from "react-feather";
 import Link from "next/link";
 
+function formatOpeningHours(rawHours: string) {
+  if (!rawHours) return { day: "Daily", time: "24 Hours" };
+  const cleanHours = rawHours.replace(/â€“/g, "-").replace(/–/g, "-").trim();
+  const parts = cleanHours.split(/:(.*)/);
+
+  if (parts.length >= 2) {
+    return { day: parts[0].trim(), time: parts[1].trim() };
+  }
+  return { day: "Opening Hours", time: cleanHours };
+}
+
 interface DetailsPopUpProps {
   isOpen: boolean;
   onClose: () => void;
-  data: any;
+  data: EnrichedAttraction;
   isFavorite: boolean;
   onFavoriteToggle: () => void;
   imageUrl?: string;
@@ -34,11 +45,7 @@ export function DetailsPopUp({
   imageUrl,
   rating,
 }: DetailsPopUpProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user } = useAuth();
-
-  const nearestMRT = data.nearestMRT;
+  const { handleFavoriteClick } = useFavoriteWithAuth(onFavoriteToggle);
 
   useEffect(() => {
     if (isOpen) {
@@ -61,37 +68,13 @@ export function DetailsPopUp({
 
   if (!isOpen || !data) return null;
 
-  const { properties } = data;
+  const nearestMRT = data.nearestMRT;
+  const p = data.properties;
+  const openingDisplay = formatOpeningHours(String(p?.OPENING_HOURS ?? ""));
 
   const displayImage =
     imageUrl ||
     "https://images.unsplash.com/photo-1554904077-80928a30ef1d?q=80&w=600";
-
-  // Auth Guard for Favorite Toggle
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user) {
-      // Encode current path to return here after login
-      const returnUrl = encodeURIComponent(pathname);
-      router.push(`/login?returnTo=${returnUrl}`);
-      return;
-    }
-
-    onFavoriteToggle();
-  };
-
-  function formatOpeningHours(rawHours: string) {
-    if (!rawHours) return { day: "Daily", time: "24 Hours" };
-    const cleanHours = rawHours.replace(/â€“/g, "-").replace(/–/g, "-").trim();
-    const parts = cleanHours.split(/:(.*)/);
-
-    if (parts.length >= 2) {
-      return { day: parts[0].trim(), time: parts[1].trim() };
-    }
-    return { day: "Opening Hours", time: cleanHours };
-  }
 
   return (
     <div
@@ -116,7 +99,7 @@ export function DetailsPopUp({
         <div className="relative h-72 sm:h-96 w-full">
           <img
             src={displayImage}
-            alt={properties.PAGETITLE}
+            alt={String(p?.PAGETITLE ?? "")}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/20" />
@@ -170,12 +153,12 @@ export function DetailsPopUp({
             {/* Title & Location */}
             <div className="space-y-3">
               <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-[0.9]">
-                {properties.PAGETITLE}
+                {p?.PAGETITLE}
               </h2>
               <div className="flex items-center gap-2 text-slate-500 font-bold text-sm">
                 <MapPin size={16} className="text-[#1572D3]" />
                 <span className="opacity-80">
-                  {properties.ADDRESS || "Singapore Landmark"}
+                  {p?.ADDRESS || "Singapore Landmark"}
                 </span>
               </div>
             </div>
@@ -189,21 +172,21 @@ export function DetailsPopUp({
                       <Clock size={16} />
                     </div>
                     <span className="text-[10px] font-black text-[#1572D3] uppercase tracking-widest">
-                      {formatOpeningHours(properties.OPENING_HOURS).day}
+                      {openingDisplay.day}
                     </span>
                   </div>
                   <p className="text-[18px] font-black italic tracking-tighter text-slate-900 leading-tight">
-                    {formatOpeningHours(properties.OPENING_HOURS).time}
+                    {openingDisplay.time}
                   </p>
                 </div>
               </div>
 
               <a
-                href={properties.EXTERNAL_LINK || "#"}
+                href={String(p?.EXTERNAL_LINK || "#")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`p-4 rounded-[28px] border flex items-center gap-3 transition-all group ${
-                  properties.EXTERNAL_LINK
+                  p?.EXTERNAL_LINK
                     ? "bg-[#1572D3]/5 border-[#1572D3]/10 hover:bg-[#1572D3]/10"
                     : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
                 }`}
@@ -245,14 +228,14 @@ export function DetailsPopUp({
                 </p>
               </div>
               <p className="text-slate-600 leading-relaxed font-medium">
-                {properties.OVERVIEW ||
+                {p?.OVERVIEW ||
                   "Experience one of Singapore's most iconic destinations."}
               </p>
             </div>
 
             {/* Back to Map Button */}
             <Link
-              href={`/map?selectedId=${data.properties.OBJECTID_1}`}
+              href={`/map?selectedId=${data.id}`}
               className="flex items-center justify-center gap-3 w-full py-5 bg-[#1572D3] !text-white font-black tracking-widest text-xs rounded-[24px] shadow-2xl shadow-[#1572D3]/40 hover:bg-[#125ba8] transition-all active:scale-[0.98]"
             >
               <Map size={18} />

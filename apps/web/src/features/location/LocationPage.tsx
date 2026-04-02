@@ -5,23 +5,27 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Filter } from "./Filter";
 import { Search } from "./Search";
-import { getAttractions } from "../../lib/api";
-import { useSavedLocations } from "../../lib/useSavedLocations";
+import { getAttractions } from "@/lib/api";
+import {
+  enrichAttractionForList,
+  type EnrichedAttraction,
+} from "@/lib/attractionData";
+import { useSavedLocations } from "@/lib/useSavedLocations";
 import { SavedSection } from "./SavedSection";
 import { BrowseSection } from "./BrowseSection";
 import { DetailsPopUp } from "./DetailsPopUp";
 import { getCategories } from "@/utils/categorize";
-import { getStaticRating } from "@/utils/generateRating";
-import { calculateDistance } from "@/utils/distance";
 
 export function LocationPage() {
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
-  const [attractions, setAttractions] = useState<any[]>([]);
+  const [attractions, setAttractions] = useState<EnrichedAttraction[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLandmark, setSelectedLandmark] = useState<any>(null);
+  const [selectedLandmark, setSelectedLandmark] = useState<EnrichedAttraction | null>(
+    null
+  );
   const [isPopUpOpen, setIsPopUpOpen] = useState(false);
 
   // Filter states
@@ -41,19 +45,7 @@ export function LocationPage() {
       setLoading(true);
       try {
         const attractionsData = await getAttractions();
-
-        // FLATTEN EVERYTHING HERE
-        const unifiedData = (attractionsData || []).map((item: any) => {
-          const id = Number(item.properties?.OBJECTID_1);
-          return {
-            ...item,
-            id: id, // Top-level ID
-            rating: getStaticRating(id), // Top-level Rating (Calculated once)
-            categories: getCategories(item), // Top-level Categories
-            // nearestMRT is already attached by backend
-          };
-        });
-
+        const unifiedData = attractionsData.map(enrichAttractionForList);
         setAttractions(unifiedData);
       } catch (error) {
         console.error(error);
@@ -70,7 +62,7 @@ export function LocationPage() {
     if (idFromUrl && attractions.length > 0) {
       // Find the specific landmark by its ID (OBJECTID_1)
       const found = attractions.find(
-        (item) => String(item.properties.OBJECTID_1) === idFromUrl
+        (item) => String(item.id) === idFromUrl
       );
 
       if (found) {
@@ -90,13 +82,13 @@ export function LocationPage() {
       .includes(searchQuery.toLowerCase());
 
     // 2. Category Match
-    const itemCats = getCategories(item);
+    const itemCats = item.categories;
     const categoryMatch =
       selectedCategories.length === 0 ||
       selectedCategories.some((cat) => itemCats.includes(cat));
 
     // 3. Rating Match
-    const itemRating = getStaticRating(Number(item.properties.OBJECTID_1));
+    const itemRating = item.rating;
     const ratingMatch = itemRating >= minRating;
 
     return titleMatch && categoryMatch && ratingMatch;
@@ -104,7 +96,7 @@ export function LocationPage() {
 
   // Filter the full attractions list to find those currently saved
   const savedLocations = attractions.filter((item) =>
-    savedIds.includes(Number(item["properties"]["OBJECTID_1"]))
+    savedIds.includes(item.id)
   );
 
   if (authLoading) return null; // Or a loading spinner
@@ -152,17 +144,10 @@ export function LocationPage() {
             isOpen={isPopUpOpen}
             onClose={() => setIsPopUpOpen(false)}
             data={selectedLandmark}
-            isFavorite={savedIds.includes(
-              Number(selectedLandmark.properties.OBJECTID_1)
-            )}
-            onFavoriteToggle={() =>
-              toggleSave(Number(selectedLandmark.properties.OBJECTID_1))
-            }
-            // Ensure these props match your updated DetailsPopUp
-            imageUrl={selectedLandmark.imageUrl}
-            rating={getStaticRating(
-              Number(selectedLandmark.properties.OBJECTID_1)
-            )}
+            isFavorite={savedIds.includes(selectedLandmark.id)}
+            onFavoriteToggle={() => toggleSave(selectedLandmark.id)}
+            imageUrl={selectedLandmark.imageUrl ?? undefined}
+            rating={selectedLandmark.rating}
           />
         )}
       </div>

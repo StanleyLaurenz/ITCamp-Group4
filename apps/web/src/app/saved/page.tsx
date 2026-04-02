@@ -7,12 +7,13 @@ import { useRouter } from "next/navigation"; // Added for redirect
 import { useAuth } from "@/context/AuthContext";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getAttractions } from "@/lib/api";
+import {
+  enrichAttractionForList,
+  type EnrichedAttraction,
+} from "@/lib/attractionData";
 import { LocationCard } from "@/features/location/LocationCard";
-import { getCategories } from "@/utils/categorize";
-import Navbar from "@/components/Navbar"; // Ensure this path is correct
+import Navbar from "@/components/Navbar";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { calculateDistance } from "@/utils/distance";
-import { getStaticRating } from "@/utils/generateRating";
 
 export default function SavedPage() {
   const { user, loading: authLoading } = useAuth();
@@ -24,7 +25,7 @@ export default function SavedPage() {
     isLoggedIn
   );
 
-  const [attractions, setAttractions] = useState<any[]>([]);
+  const [attractions, setAttractions] = useState<EnrichedAttraction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Redirect if not logged in
@@ -40,21 +41,7 @@ export default function SavedPage() {
       setIsLoading(true);
       try {
         const data = await getAttractions();
-
-        // Flatten the data immediately so it matches your other pages
-        const flattened = (data || []).map((item: any) => {
-          const id = Number(item.properties?.OBJECTID_1);
-          return {
-            ...item,
-            id: id,
-            // Generate the static rating here
-            rating: getStaticRating(id),
-            // Generate categories here
-            categories: getCategories(item),
-          };
-        });
-
-        setAttractions(flattened);
+        setAttractions(data.map(enrichAttractionForList));
       } catch (error) {
         console.error("Failed to fetch attractions:", error);
       } finally {
@@ -65,14 +52,11 @@ export default function SavedPage() {
   }, []);
 
   const savedAttractions = attractions.filter((item) =>
-    savedOrder.includes(Number(item.properties.OBJECTID_1))
+    savedOrder.includes(item.id)
   );
 
   const sortedSaved = [...savedAttractions].sort((a, b) => {
-    return (
-      savedOrder.indexOf(Number(b.properties.OBJECTID_1)) -
-      savedOrder.indexOf(Number(a.properties.OBJECTID_1))
-    );
+    return savedOrder.indexOf(b.id) - savedOrder.indexOf(a.id);
   });
 
   if (authLoading || isLoading) {
@@ -138,18 +122,16 @@ export default function SavedPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {sortedSaved.map((item) => (
                 <LocationCard
-                  key={item.properties.OBJECTID_1}
-                  id={item.properties.OBJECTID_1}
-                  title={item.properties.PAGETITLE}
-                  mrtLocation={item.properties.ADDRESS || "Singapore"}
+                  key={item.id}
+                  id={String(item.id)}
+                  title={String(item.properties?.PAGETITLE ?? "")}
+                  mrtLocation={String(item.properties?.ADDRESS ?? "Singapore")}
                   rating={item.rating}
-                  categories={getCategories(item)}
-                  imageUrl={item.imageUrl}
+                  categories={item.categories}
+                  imageUrl={item.imageUrl ?? undefined}
                   isFavorite={true}
-                  onFavoriteToggle={() =>
-                    toggleSave(Number(item.properties.OBJECTID_1))
-                  }
-                  item={item} // This now contains the 'nearestMRT' property
+                  onFavoriteToggle={() => toggleSave(item.id)}
+                  item={item}
                 />
               ))}
             </div>

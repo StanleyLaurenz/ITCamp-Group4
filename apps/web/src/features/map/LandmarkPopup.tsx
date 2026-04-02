@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart, Star, MapPin, X, ExternalLink } from "react-feather";
+import { CATEGORY_CHIP_STYLES } from "@/constants/categoryStyles";
 import type { Landmark } from "./types";
 import Link from "next/link";
 
@@ -11,15 +12,6 @@ interface LandmarkPopupProps {
   onClose: () => void;
   isLoggedIn: boolean;
 }
-
-const categoryStyles: Record<string, string> = {
-  "Arts & Museum": "bg-purple-500/10 text-purple-300 border-purple-500/20",
-  "Culture & Heritage": "bg-amber-500/10 text-amber-300 border-amber-500/20",
-  "Nature & Parks": "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-  Architecture: "bg-blue-500/10 text-blue-300 border-blue-500/20",
-  Lifestyle: "bg-pink-500/10 text-pink-300 border-pink-500/20",
-  Landmark: "bg-slate-500/10 text-slate-300 border-slate-500/20",
-};
 
 export default function LandmarkPopup({
   landmark,
@@ -114,7 +106,7 @@ export default function LandmarkPopup({
                   <span
                     key={cat}
                     className={`px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase border backdrop-blur-md transition-colors ${
-                      categoryStyles[cat] || categoryStyles["Landmark"]
+                      CATEGORY_CHIP_STYLES[cat] || CATEGORY_CHIP_STYLES["Landmark"]
                     }`}
                   >
                     {cat}
