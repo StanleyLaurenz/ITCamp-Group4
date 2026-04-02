@@ -93,6 +93,7 @@ Run both apps together:
 ```bash
 npm run dev
 ```
+OR
 
 Run apps separately:
 
