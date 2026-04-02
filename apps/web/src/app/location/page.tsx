@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { LocationPage } from "@/features/location/LocationPage"; // Adjust path if needed
+import { LocationPage } from "@/features/location/LocationPage";
 import Navbar from "@/components/Navbar";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 

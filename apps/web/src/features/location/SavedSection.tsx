@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Heart } from "react-feather";
 import { LocationCard } from "./LocationCard";
-import { getCategories } from "../../utils/categorize";
+import { getCategories } from "@/utils/categorize";
 
 interface SavedSectionProps {
   isLoggedIn: boolean;

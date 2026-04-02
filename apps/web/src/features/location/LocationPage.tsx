@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getAttractions } from "@/lib/api";
 import { useSavedLocations } from "@/lib/useSavedLocations";
-import { calculateDistance } from "@/utils/distance";
 import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
 import { Filter } from "./Filter";

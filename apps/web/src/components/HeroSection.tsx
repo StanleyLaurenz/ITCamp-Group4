@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Navigation, Shield, Zap } from "react-feather";
+import { Navigation, Shield } from "react-feather";
 
 /**
  * Responsive Enhanced Hero Section

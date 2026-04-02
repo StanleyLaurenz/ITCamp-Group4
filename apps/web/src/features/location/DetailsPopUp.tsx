@@ -10,7 +10,6 @@ import {
   Globe,
   Heart,
   Map,
-  ExternalLink,
   Star,
 } from "react-feather";
 import Link from "next/link";

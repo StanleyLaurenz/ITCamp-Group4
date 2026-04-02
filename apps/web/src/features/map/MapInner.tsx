@@ -147,16 +147,16 @@ function MapClickHandler({ onClose }: { onClose: () => void }) {
 }
 
 interface MapInnerProps {
-  landmarks: Landmark[];
-  savedIds: number[];
+  initialSelectedId: number | null;
   onToggleSave: (id: number) => void;
   isLoggedIn: boolean;
   showLandmarks: boolean;
   showTaxi: boolean;
-  taxis: Taxi[];
   showSavedOnly: boolean;
-  initialSelectedId: number | null;
   showMRT: boolean;
+  landmarks: Landmark[];
+  taxis: Taxi[];
+  savedIds: number[];
   mrtData: { stations: any[]; lines: any[] } | null;
   activeLines: string[]; // ADD THIS
 }
@@ -196,16 +196,16 @@ function MapController({
 }
 
 export default function MapInner({
-  landmarks,
-  savedIds,
-  onToggleSave,
   initialSelectedId,
+  onToggleSave,
   isLoggedIn,
   showLandmarks,
   showTaxi,
-  taxis,
   showSavedOnly,
   showMRT,
+  landmarks,
+  taxis,
+  savedIds,
   mrtData,
   activeLines,
 }: MapInnerProps) {
@@ -239,7 +239,7 @@ export default function MapInner({
         <MapClickHandler onClose={() => setSelectedId(null)} />
 
         {/* --- TAXI LAYER --- */}
-        {showTaxi &&              //Activates when the taxi button is on,
+        {showTaxi &&              //Activates when the taxi button is on and
           Array.isArray(taxis) && //if taxis is an array.
           taxis.map((taxi, i) =>  //Maps each taxi to a Circle.
             <Circle

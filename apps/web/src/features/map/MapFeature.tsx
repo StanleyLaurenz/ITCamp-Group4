@@ -1,17 +1,17 @@
 "use client";
 
-import WeatherWidget from "@/components/WeatherWidget";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
 import { MapPin, Heart } from "react-feather";
+import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
+import type { Landmark, Taxi } from "./types";
+import { useAuth } from "@/context/AuthContext";
 import { getAttractions, getMRTStations, getTaxis } from "@/lib/api";
 import { useSavedLocations } from "@/lib/useSavedLocations";
 import { getCategories } from "@/utils/categorize";
 import { getStaticRating } from "@/utils/generateRating";
-import { useAuth } from "@/context/AuthContext";
-import type { Landmark, Taxi } from "./types";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import WeatherWidget from "@/components/WeatherWidget";
 
 const MapInner = dynamic(() => import("./MapInner"), { ssr: false });
 
@@ -84,6 +84,7 @@ export function MapFeature() {
         setMrtData(mrtDataResponse);
       } catch (err) {
         setError("Failed to load Attraction or MRT data.");
+        console.log(err);
       } finally {
         setLoading(false);
       }
@@ -110,7 +111,8 @@ export function MapFeature() {
         const taxiData = await getTaxis();
         setTaxis(taxiData);
       } catch (err) {
-        setError(`Failed to load taxi data - ${err}`);
+        setError("Failed to load taxi data");
+        console.log(err);
       }
     };
 
@@ -130,16 +132,16 @@ export function MapFeature() {
   return (
     <div className="relative flex-1 w-full overflow-hidden">
       <MapInner
-        landmarks={landmarks}
         initialSelectedId={initialId ? Number(initialId) : null}
-        savedIds={savedIds}
         onToggleSave={toggleSave}
         isLoggedIn={isLoggedIn}
         showLandmarks={showLandmarks}
         showTaxi={showTaxi}
-        taxis={taxis}
         showSavedOnly={showSavedOnly}
         showMRT={showMRT}
+        landmarks={landmarks}
+        taxis={taxis}
+        savedIds={savedIds}
         mrtData={mrtData}
         activeLines={activeLines}
       />
