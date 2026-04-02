@@ -244,9 +244,6 @@ export default function MapInner({
         {showTaxi &&              //Activates when the taxi button is on,
           Array.isArray(taxis) && //if taxis is an array.
           taxis.map((taxi, i) =>  //Maps each taxi to a Circle.
-
-            //TODO: Change/update the taxi marker for better visibility
-
             <Circle
               key={i} // index for element tracking
               center={[taxi.lat, taxi.lng]} // taxi coordinates
