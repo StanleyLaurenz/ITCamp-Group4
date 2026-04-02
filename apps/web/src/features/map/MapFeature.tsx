@@ -193,13 +193,13 @@ export function MapFeature() {
             onClick={() => setShowMRT(!showMRT)}
             className={`flex items-center gap-2 rounded-[22px] px-4 py-2.5 transition-all active:scale-95 border ${
               showMRT
-                ? "bg-emerald-600 text-white border-emerald-700"
+                ? "bg-[#1572D3] text-white border-[#1572D3]"
                 : "text-slate-500 border-transparent hover:bg-slate-200/50"
             }`}
           >
             <div
               className={`w-2 h-2 rounded-full ${
-                showMRT ? "bg-white animate-pulse" : "bg-emerald-500"
+                showMRT ? "bg-white animate-pulse" : "bg-[#1572D3]"
               }`}
             />
             <span className="text-[11px] font-black uppercase tracking-wider">
