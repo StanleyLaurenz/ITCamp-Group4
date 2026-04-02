@@ -77,36 +77,40 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your-supabase-publishable-key
 ```
+# Using the app
 
-## Setup
-
+## 1. Setup
+Install dependencies:
 ```bash
 npm install
+```
+Create environment files from the examples:
+```bash
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 ```
+**Note**: Don't forget to update ```.env``` files with the required values before running the app
 
-## Run The Project
+## 2. Build
+Build the application to make sure everything is OK
+```bash
+npm run build
+```
 
+## 3. Run The Project
 Run both apps together:
-
 ```bash
 npm run dev
 ```
 OR
 
 Run apps separately:
-
 ```bash
 npm run dev:web
 npm run dev:api
 ```
 
-## Build
 
-```bash
-npm run build
-```
 
 ## Notes
 
