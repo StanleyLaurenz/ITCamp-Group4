@@ -7,9 +7,11 @@ apps/*/node_modules
 # Environment files
 .env
 .env.local
+apps/*/.env
 apps/*/.env.local
 
 # Build output
 dist
 apps/*/dist
 apps/*/.next
+apps/*/tsconfig.tsbuildinfo

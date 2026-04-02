@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { MapPin, Heart, Star, Map, Info } from "react-feather";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
-import { DetailsPopUp } from "./DetailsPopUp";
-import Link from "next/link"; // Import Link
+import Link from "next/link";
+import { DetailsPopup } from "./DetailsPopUp";
 
 interface LocationCardProps {
   id: string;
@@ -13,7 +13,6 @@ interface LocationCardProps {
   title: string;
   rating: number;
   mrtLocation: string;
-  nearestMRT?: string; // Add this line
   categories: string[];
   isFavorite: boolean;
   onFavoriteToggle: () => void;
@@ -40,45 +39,39 @@ export function LocationCard({
   const categoryStyles: Record<string, string> = {
     "Arts & Museum": "bg-purple-500/10 text-purple-300 border-purple-500/20",
     "Culture & Heritage": "bg-amber-500/10 text-amber-300 border-amber-500/20",
-    "Nature & Parks":
-      "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-    Architecture: "bg-blue-500/10 text-blue-300 border-blue-500/20",
-    Lifestyle: "bg-pink-500/10 text-pink-300 border-pink-500/20",
-    Landmark: "bg-slate-500/10 text-slate-300 border-slate-500/20",
+    "Nature & Parks": "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+    "Architecture": "bg-blue-500/10 text-blue-300 border-blue-500/20",
+    "Lifestyle": "bg-pink-500/10 text-pink-300 border-pink-500/20",
+    "Landmark": "bg-slate-500/10 text-slate-300 border-slate-500/20",
   };
 
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useAuth(); // Get user status
+  const { user } = useAuth();
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!user) {
-      // If not logged in, redirect to login with a return path
       const returnUrl = encodeURIComponent(pathname);
       router.push(`/login?returnTo=${returnUrl}`);
       return;
     }
 
-    // If logged in, proceed with the toggle
     onFavoriteToggle();
   };
 
   return (
     <div className="group relative w-full max-w-[320px] mx-auto h-[420px] rounded-[32px] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl cursor-pointer">
-      {/* 1. Background Image */}
       <img
         src={backgroundUrl}
         alt={title}
         className="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-700 group-hover:scale-110"
       />
 
-      {/* 2. Linear Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-10" />
 
-      {/* 3. Favorite Icon */}
       <button
         onClick={handleFavoriteClick}
         className="absolute top-5 right-5 z-20 p-2.5 bg-black/20 backdrop-blur-md rounded-full border border-white/20 transition-all hover:bg-black/40 active:scale-90"
@@ -91,35 +84,29 @@ export function LocationCard({
         />
       </button>
 
-      {/* 4. Content Section */}
-      {/* 4. Content Section */}
       <div className="absolute bottom-0 left-0 right-0 p-6 z-20 text-white space-y-3">
-        {/* 1. MRT Pre-header (Top of Title) */}
         {item.nearestMRT && (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border transition-all active:scale-95 group/mrt w-fit bg-[#1572D3]/20 border-[#1572D3]/30">
-      {/* MRT Icon (SVG) */}
-      <svg 
-        width="14" 
-        height="14" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="3" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        className="flex-shrink-0 text-[#1572D3]"
-      >
-        <rect x="4" y="3" width="16" height="15" rx="2" />
-        <path d="M4 11h16M8 18l-2 3M16 18l2 3" />
-      </svg>
-      
-      <span className="text-[10px] font-black uppercase text-white tracking-[0.1em] drop-shadow-md">
-        {item.nearestMRT}
-      </span>
-    </div>
-  )}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border transition-all active:scale-95 group/mrt w-fit bg-[#1572D3]/20 border-[#1572D3]/30">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="flex-shrink-0 text-[#1572D3]"
+            >
+              <rect x="4" y="3" width="16" height="15" rx="2" />
+              <path d="M4 11h16M8 18l-2 3M16 18l2 3" />
+            </svg>
+            <span className="text-[10px] font-black uppercase text-white tracking-[0.1em] drop-shadow-md">
+              {item.nearestMRT}
+            </span>
+          </div>
+        )}
 
-        {/* 2. Title & Address Row */}
         <div className="space-y-1">
           <h3 className="text-xl font-bold leading-tight line-clamp-2 tracking-tight text-white drop-shadow-lg">
             {title}
@@ -132,7 +119,6 @@ export function LocationCard({
           </div>
         </div>
 
-        {/* 3. Rating and Details Row */}
         <div className="flex gap-2 items-center pt-1">
           <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10">
             <Star size={10} className="text-yellow-400 fill-yellow-400" />
@@ -154,7 +140,6 @@ export function LocationCard({
           </button>
         </div>
 
-        {/* 4. Categories Grid */}
         <div className="flex items-center flex-wrap gap-1.5">
           {categories.map((cat) => (
             <span
@@ -168,7 +153,6 @@ export function LocationCard({
           ))}
         </div>
 
-        {/* 5. View Map Button */}
         <Link
           href={`/map?selectedId=${id}`}
           onClick={(e) => e.stopPropagation()}
@@ -179,7 +163,7 @@ export function LocationCard({
         </Link>
       </div>
 
-      <DetailsPopUp
+      <DetailsPopup
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
         data={item}

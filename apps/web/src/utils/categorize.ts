@@ -1,5 +1,3 @@
-// utils/categorize.ts
-
 export function getCategories(item: any): string[] {
   const title = (item.properties.PAGETITLE || "").toLowerCase();
   const overview = (item.properties.OVERVIEW || "").toLowerCase();

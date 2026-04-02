@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AuthProvider } from "@/context/AuthContext";
-import "../styles/index.css";
+import "@/styles/index.css";
 
 export const metadata: Metadata = {
   title: "Trippa",

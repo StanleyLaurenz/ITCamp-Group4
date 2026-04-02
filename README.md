@@ -1,111 +1,131 @@
-# ITCamp-Group4
+# Trippa
 
-This repository is set up as an `npm` workspace monorepo with a Next.js frontend and a Node.js backend.
+Trippa is a school project for exploring tourist attractions in Singapore. The project has a Next.js frontend and an Express backend inside one npm workspace repo.
 
-## Stack
+## Tech Stack
 
-- `apps/web`: Next.js + React + TypeScript + Tailwind CSS
-- `apps/api`: Express + TypeScript
-- Root workspace scripts for local development and builds
+- `apps/web`: Next.js, React, TypeScript, Tailwind CSS, Supabase auth, Leaflet
+- `apps/api`: Express, TypeScript
+- Root workspace: npm workspaces + concurrent dev scripts
 
-## Repository Structure
+## Project Structure
 
 ```text
 .
 ├── apps
 │   ├── api
-│   │   └── src
+│   │   ├── src
+│   │   │   ├── config
+│   │   │   ├── controllers
+│   │   │   ├── middleware
+│   │   │   ├── routes
+│   │   │   └── server.ts
+│   │   ├── .env.example
+│   │   └── package.json
 │   └── web
-│       └── src
-│           ├── app
-│           ├── components
-│           ├── features
-│           ├── layouts
-│           └── lib
-├── .nvmrc
+│       ├── public
+│       ├── src
+│       │   ├── app
+│       │   ├── components
+│       │   ├── context
+│       │   ├── features
+│       │   │   ├── location
+│       │   │   └── map
+│       │   ├── lib
+│       │   ├── styles
+│       │   └── utils
+│       ├── .env.example
+│       └── package.json
+├── docs
+│   └── submission-notes.md
 ├── package.json
 └── README.md
 ```
 
-The frontend uses the Next.js App Router from `apps/web/src/app`. Do not create a parallel `apps/web/app` or `src/pages` router unless the team intentionally decides to migrate routing.
+## Main Pages
 
-## Requirements
+- `/`: landing page
+- `/location`: browse and filter attractions
+- `/map`: interactive map with landmarks, taxis, saved items, and MRT
+- `/saved`: saved attractions for logged-in users
+- `/login`: login and reset request
+- `/signup`: register account
+- `/reset-password`: set a new password from Supabase recovery flow
 
-- Node.js `22.x` recommended via `.nvmrc`
-- `npm` as the package manager
+## Backend Endpoints Used
 
-## Setup
+- `GET /api/health`
+- `GET /api/attractions`
+- `GET /api/taxi`
+- `GET /api/mrt`
 
-```bash
-nvm use
-npm install
-```
-
-Copy the example environment files before starting:
-
-```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
-```
-
-Default values:
-
-- `apps/web/.env`: `NEXT_PUBLIC_API_BASE_URL=http://localhost:3001`
-- `apps/api/.env`: `PORT=3001`, `CLIENT_ORIGIN=http://localhost:3000`
-
-## Run The Apps
-
-Start both apps:
-
-```bash
-npm run dev
-```
-
-Start them separately:
-
-```bash
-npm run dev:web
-npm run dev:api
-```
-
-## Build
-
-```bash
-npm run build
-```
-
-## Default Local URLs
-
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:3001`
-- Health check: `http://localhost:3001/api/health`
-
-## Team Conventions
-
-- Build frontend routes under `apps/web/src/app`
-- Build frontend UI and feature code under `apps/web/src/components` and `apps/web/src/features`
-- Build backend code under `apps/api/src`
-- Do not edit files inside `node_modules`, `.next`, or `dist`
-- Use `npm run dev` from the repository root for day-to-day development
+The weather panel in the frontend uses the internal Next.js route at `apps/web/src/app/weather/route.ts`.
 
 ## Environment Variables
 
 ### `apps/api/.env`
 
-- `PORT`: API server port
-- `CLIENT_ORIGIN`: allowed frontend origin for CORS
+```env
+PORT=3001
+CLIENT_ORIGIN=http://localhost:3000
+```
 
-### `apps/web/.env`
+### `apps/web/.env.local`
 
-- `NEXT_PUBLIC_API_BASE_URL`: backend base URL used by the frontend
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your-supabase-publishable-key
+```
+# Using the app
 
-## 👥 Participants
+## 1. Setup
+Install dependencies:
+```bash
+npm install
+```
+Create environment files from the examples:
+```bash
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
+```
+**Note**: Don't forget to update ```.env``` files with the required values before running the app
 
-| Role    | Name         |
-|---------|--------------|
-| Mentor  | Winston      |
-| Leader  | Stanley      |
-| Member  | Shravanthiga |
-| Member  | Sanjuvigasini|
-| Member  | Monica       |
-| Member  | Rivaldo      |
+## 2. Build
+Build the application to make sure everything is OK
+```bash
+npm run build
+```
+
+## 3. Run The Project
+Run both apps together:
+```bash
+npm run dev
+```
+OR
+
+Run apps separately:
+```bash
+npm run dev:web
+npm run dev:api
+```
+
+
+
+## Notes
+
+- Frontend default URL: `http://localhost:3000`
+- Backend default URL: `http://localhost:3001`
+- Supabase is used for authentication and saved locations
+- Attraction, taxi, MRT, and weather data come from the backend or public Singapore data endpoints used by the app
+
+## Team
+
+| Role | Name |
+| --- | --- |
+| Mentor | Winston |
+| Leader | Stanley |
+| Member | Shravanthiga |
+| Member | Sanjuvigasini |
+| Member | Monica |
+| Member | Rivaldo |
