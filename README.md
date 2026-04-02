@@ -1,6 +1,6 @@
 # Trippa
 
-Trippa is a school project for exploring tourist attractions in Singapore. The project has a Next.js frontend and an Express backend inside one npm workspace repo.
+Trippa is a Singapore travel app designed to help travelers easily explore and navigate the city by providing essential tools and information in one platform. The app allows users to sign up and sign in, then access a clean interface with a navbar featuring sign-out and a favorites (love) icon. It includes a hero section as the main landing page, followed by an interactive map where users can view locations through markers, apply filters, check weather conditions, and click on markers to see detailed information. Each location page provides descriptions, nearby MRT stations, and a map view for better navigation. Users can search for places and save their favorite locations, which are then organized in a dedicated saved page displaying their collections. Overall, the app integrates multiple pages—such as the hero section, map view, location details, and saved collections—to create a seamless and user-friendly travel experience in Singapore. The project has a Next.js frontend and an Express backend inside one npm workspace repo.
 
 ## Tech Stack
 
@@ -68,6 +68,7 @@ The weather panel in the frontend uses the internal Next.js route at `apps/web/s
 ```env
 PORT=3001
 CLIENT_ORIGIN=http://localhost:3000
+PEXELS_API_KEY=your-pexel-api-key
 ```
 
 ### `apps/web/.env.local`
@@ -117,7 +118,7 @@ npm run dev:api
 - Frontend default URL: `http://localhost:3000`
 - Backend default URL: `http://localhost:3001`
 - Supabase is used for authentication and saved locations
-- Attraction, taxi, MRT, and weather data come from the backend or public Singapore data endpoints used by the app
+- Attraction, taxi, MRT, and weather data come from the backend or public Singapore data endpoints used by the app (data.gov.sg)
 
 ## Team
 
@@ -128,4 +129,4 @@ npm run dev:api
 | Member | Shravanthiga |
 | Member | Sanjuvigasini |
 | Member | Monica |
-| Member | Rivaldo |
+| Tech Lead | Rivaldo |
