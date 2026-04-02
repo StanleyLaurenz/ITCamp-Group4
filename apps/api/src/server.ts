@@ -14,6 +14,7 @@ const app = express();
 app.use(
   cors({
     origin: env.clientOrigin,
+    credentials: true
   })
 );
 
@@ -37,5 +38,5 @@ app.use("/api/mrt", mrtRouter);
 app.use(errorHandler);
 
 app.listen(env.port, () => {
-  console.log(`API listening on http://localhost:${env.port}`);
+  console.log(`API listening on port ${env.port}`);
 });
