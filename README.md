@@ -1,12 +1,18 @@
 # Trippa
 
-Trippa is a Singapore travel app designed to help travelers easily explore and navigate the city by providing essential tools and information in one platform. The app allows users to sign up and sign in, then access a clean interface with a navbar featuring sign-out and a favorites (love) icon. It includes a hero section as the main landing page, followed by an interactive map where users can view locations through markers, apply filters, check weather conditions, and click on markers to see detailed information. Each location page provides descriptions, nearby MRT stations, and a map view for better navigation. Users can search for places and save their favorite locations, which are then organized in a dedicated saved page displaying their collections. Overall, the app integrates multiple pages—such as the hero section, map view, location details, and saved collections—to create a seamless and user-friendly travel experience in Singapore. The project has a Next.js frontend and an Express backend inside one npm workspace repo.
+A Singapore travel app designed to help travelers easily explore and navigate the city by providing essential tools and information in one platform.
 
-## Tech Stack
+## Contents
 
-- `apps/web`: Next.js, React, TypeScript, Tailwind CSS, Supabase auth, Leaflet
-- `apps/api`: Express, TypeScript
-- Root workspace: npm workspaces + concurrent dev scripts
+- [Description](#description)
+- [Project Structure](#project-structure)
+- [How to Use The App](#how-to-use-the-app)
+- [Notes](#notes)
+- [Team](#team)
+
+## Description
+
+The app allows users to sign up and sign in, then access a clean interface with a navbar featuring sign-out and a favorites (love) icon. It includes a hero section as the main landing page, followed by an interactive map where users can view locations through markers, apply filters, check weather conditions, and click on markers to see detailed information. Each location page provides descriptions, nearby MRT stations, and a map view for better navigation. Users can search for places and save their favorite locations, which are then organized in a dedicated saved page displaying their collections. Overall, the app integrates multiple pages—such as the hero section, map view, location details, and saved collections—to create a seamless and user-friendly travel experience in Singapore. The project has a Next.js frontend and an Express backend inside one npm workspace repo.
 
 ## Project Structure
 
@@ -42,7 +48,14 @@ Trippa is a Singapore travel app designed to help travelers easily explore and n
 └── README.md
 ```
 
-## Main Pages
+### Tech Stack
+
+- `apps/web`: Next.js, React, TypeScript, Tailwind CSS, Supabase auth, Leaflet
+- `apps/api`: Express, TypeScript
+- Root workspace: npm workspaces + concurrent dev scripts
+
+
+### Main Pages
 
 - `/`: landing page
 - `/location`: browse and filter attractions
@@ -52,7 +65,8 @@ Trippa is a Singapore travel app designed to help travelers easily explore and n
 - `/signup`: register account
 - `/reset-password`: set a new password from Supabase recovery flow
 
-## Backend Endpoints Used
+
+### Backend Endpoints Used
 
 - `GET /api/health`
 - `GET /api/attractions`
@@ -61,9 +75,11 @@ Trippa is a Singapore travel app designed to help travelers easily explore and n
 
 The weather panel in the frontend uses the internal Next.js route at `apps/web/src/app/weather/route.ts`.
 
-## Environment Variables
 
-### `apps/api/.env`
+### Environment Variables
+
+
+#### `apps/api/.env`
 
 ```env
 PORT=3001
@@ -71,47 +87,66 @@ CLIENT_ORIGIN=http://localhost:3000
 PEXELS_API_KEY=your-pexel-api-key
 ```
 
-### `apps/web/.env.local`
+#### `apps/web/.env.local`
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your-supabase-publishable-key
 ```
-# Using the app
 
-## 1. Setup
-Install dependencies:
+## How to Use The App
+
+### Option 1: Use the Hosted Version
+
+Click on this link: https://trippa.up.railway.app/
+
+### Option 2: Run locally
+
+Follow these steps to set up and run the app on your machine:
+
+#### 1. Clone the Repository
+
+```bash
+git clone <your-repo-url>
+cd <your-project-folder>
+```
+
+#### 2. Install Dependencies
+
+Install all the required packages:
 ```bash
 npm install
 ```
+
+#### 3. Configure Environment Variables
+
 Create environment files from the examples:
 ```bash
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 ```
-**Note**: Don't forget to update ```.env``` files with the required values before running the app
+**Note**: Make sure to update `.env` files with the required values before running the app
 
-## 2. Build
-Build the application to make sure everything is OK
+#### 4. Build The Project
+
+Build the application to make sure everhting is set up correctly:
 ```bash
 npm run build
 ```
 
-## 3. Run The Project
+#### 5. Run The App
+
 Run both apps together:
 ```bash
 npm run dev
 ```
-OR
 
-Run apps separately:
+Or run them separately:
 ```bash
 npm run dev:web
 npm run dev:api
 ```
-
-
 
 ## Notes
 
@@ -126,7 +161,7 @@ npm run dev:api
 | --- | --- |
 | Mentor | Winston |
 | Leader | Stanley |
-| Member | Shravanthiga |
-| Member | Sanjuvigasini |
-| Member | Monica |
+| Design Lead | Sanjuvigasini |
 | Tech Lead | Rivaldo |
+| Developer | Monica |
+| Developer | Shravanthiga |
