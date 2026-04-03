@@ -159,6 +159,8 @@ npm run dev:api
 
 ## Live deployed link (Railway)
 
+https://trippa.up.railway.app/
+
 ## Known limitations and future improvements
 
 One limitation of our app is the level of detail available on the location pages, which is primarily constrained by the limitations of the external APIs we currently use. Many free or basic-tier APIs provide restricted datasets, meaning we are only able to display general information rather than comprehensive details such as opening hours, reviews, or real-time updates. Additionally, while we integrated Pexels to enhance the visual experience, the images are not always location-specific, which can result in visuals that do not accurately represent the actual place.
@@ -175,6 +177,14 @@ For future improvements, we aim to integrate more robust and specialized locatio
 | Tech Lead   | Rivaldo       |
 | Developer   | Monica        |
 | Developer   | Shravanthiga  |
+
+## Team Contribution
+
+Stanley : taxi and mrt feature, app deployment (backend)
+Sanjuvigasini : design, weather widget, slides and demo video
+Rivaldo : location and saved page, location backend, modifying finishing touches for every features
+Monica : auth flow, hero section, heart/save functionality, map page baseline, landmark feature
+Shravanthiga : design, weather widget, slides and demo video
 
 # Presentation Materials
 
