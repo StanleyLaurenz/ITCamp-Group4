@@ -54,7 +54,6 @@ The app allows users to sign up and sign in, then access a clean interface with 
 - `apps/api`: Express, TypeScript
 - Root workspace: npm workspaces + concurrent dev scripts
 
-
 ### Main Pages
 
 - `/`: landing page
@@ -65,7 +64,6 @@ The app allows users to sign up and sign in, then access a clean interface with 
 - `/signup`: register account
 - `/reset-password`: set a new password from Supabase recovery flow
 
-
 ### Backend Endpoints Used
 
 - `GET /api/health`
@@ -75,9 +73,7 @@ The app allows users to sign up and sign in, then access a clean interface with 
 
 The weather panel in the frontend uses the internal Next.js route at `apps/web/src/app/weather/route.ts`.
 
-
 ### Environment Variables
-
 
 #### `apps/api/.env`
 
@@ -115,6 +111,7 @@ cd <your-project-folder>
 #### 2. Install Dependencies
 
 Install all the required packages:
+
 ```bash
 npm install
 ```
@@ -122,15 +119,18 @@ npm install
 #### 3. Configure Environment Variables
 
 Create environment files from the examples:
+
 ```bash
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 ```
+
 **Note**: Make sure to update `.env` files with the required values before running the app
 
 #### 4. Build The Project
 
 Build the application to make sure everhting is set up correctly:
+
 ```bash
 npm run build
 ```
@@ -138,11 +138,13 @@ npm run build
 #### 5. Run The App
 
 Run both apps together:
+
 ```bash
 npm run dev
 ```
 
 Or run them separately:
+
 ```bash
 npm run dev:web
 npm run dev:api
@@ -155,13 +157,25 @@ npm run dev:api
 - Supabase is used for authentication and saved locations
 - Attraction, taxi, MRT, and weather data come from the backend or public Singapore data endpoints used by the app (data.gov.sg)
 
+## Live deployed link (Railway)
+
+## Known limitations and future improvements
+
+One limitation of our app is the level of detail available on the location pages, which is primarily constrained by the limitations of the external APIs we currently use. Many free or basic-tier APIs provide restricted datasets, meaning we are only able to display general information rather than comprehensive details such as opening hours, reviews, or real-time updates. Additionally, while we integrated Pexels to enhance the visual experience, the images are not always location-specific, which can result in visuals that do not accurately represent the actual place.
+
+For future improvements, we aim to integrate more robust and specialized location-based APIs that offer richer and more reliable data, even if it requires moving to paid services. This would allow us to provide more accurate, detailed, and dynamic information for each location. Furthermore, we plan to replace or supplement Pexels with APIs that provide verified, location-specific images to improve authenticity. Enhancing data accuracy, expanding content depth, and improving visual relevance will significantly elevate the overall user experience.
+
 ## Team
 
-| Role | Name |
-| --- | --- |
-| Mentor | Winston |
-| Leader | Stanley |
+| Role        | Name          |
+| ----------- | ------------- |
+| Mentor      | Winston       |
+| Leader      | Stanley       |
 | Design Lead | Sanjuvigasini |
-| Tech Lead | Rivaldo |
-| Developer | Monica |
-| Developer | Shravanthiga |
+| Tech Lead   | Rivaldo       |
+| Developer   | Monica        |
+| Developer   | Shravanthiga  |
+
+# Presentation Materials
+
+https://drive.google.com/drive/folders/1L5avBcUzWSvj2bdi1BEPpIeL8XD2qXT6
